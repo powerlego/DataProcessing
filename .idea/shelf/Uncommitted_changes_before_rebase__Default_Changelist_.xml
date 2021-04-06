@@ -1,0 +1,39 @@
+<changelist name="Uncommitted_changes_before_rebase_[Default_Changelist]" date="1617752094422" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before rebase [Default Changelist]" />
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/security/policy/unlimited/local_policy.jar" />
+    <option name="AFTER_PATH" value="jre/lib/security/policy/unlimited/local_policy.jar" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/local_policy.jar" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/security/policy/unlimited/US_export_policy.jar" />
+    <option name="AFTER_PATH" value="jre/lib/security/policy/unlimited/US_export_policy.jar" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/US_export_policy.jar" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/tzdb.dat" />
+    <option name="AFTER_PATH" value="jre/lib/tzdb.dat" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/tzdb.dat" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/security/policy/limited/US_export_policy.jar" />
+    <option name="AFTER_PATH" value="jre/lib/security/policy/limited/US_export_policy.jar" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/US_export_policy1.jar" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/security/policy/limited/local_policy.jar" />
+    <option name="AFTER_PATH" value="jre/lib/security/policy/limited/local_policy.jar" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/local_policy1.jar" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/rt.jar" />
+    <option name="AFTER_PATH" value="jre/lib/rt.jar" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/rt.jar" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="jre/lib/security/cacerts" />
+    <option name="AFTER_PATH" value="jre/lib/security/cacerts" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Default_Changelist]/cacerts" />
+  </binary>
+</changelist>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import com.jfoenix.svg.SVGGlyph?>
+<?import com.jfoenix.validation.RequiredFieldValidator?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:id="root" xmlns="http://javafx.com/javafx">
+    <VBox alignment="CENTER" maxHeight="250.0" maxWidth="1.7976931348623157E308" spacing="25">
+        <Label fx:id="processor" style="-fx-font-size: 48; -fx-font-weight: BOLD"/>
+        <VBox spacing="30" alignment="CENTER" maxWidth="Infinity">
+            <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="10">
+                <JFXButton fx:id="fileSelect1" alignment="CENTER" buttonType="RAISED" contentDisplay="CENTER"
+                           ellipsisString="" graphicTextGap="0.0" minHeight="40" minWidth="40" prefHeight="40"
+                           prefWidth="40" style="-fx-background-color: white" textFill="TRANSPARENT">
+                    <graphic>
+                        <SVGGlyph fx:id="glyph1" fill="BLACK" size="35.0"
+                                  style="-fx-shape: 'M832 960l192-512h-832l-192 512zM128 384l-128 576v-832h288l128 128h416v128z'"/>
+                    </graphic>
+                </JFXButton>
+                <JFXTextField fx:id="filePath1" labelFloat="true" maxWidth="1.7976931348623157E308" minWidth="0.0"
+                              promptText="Location of Data Files" style="-fx-font-size: 14" HBox.hgrow="ALWAYS">
+                    <validators>
+                        <RequiredFieldValidator message="Valid Directory Required!">
+                            <FontIcon iconLiteral="fas-exclamation-triangle"/>
+                        </RequiredFieldValidator>
+                    </validators>
+                </JFXTextField>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="10">
+                <JFXButton fx:id="fileSelect2" alignment="CENTER" buttonType="RAISED" contentDisplay="CENTER"
+                           graphicTextGap="0.0" minHeight="40" minWidth="40" prefHeight="40" prefWidth="40"
+                           style="-fx-background-color: white" textFill="TRANSPARENT">
+                    <graphic>
+                        <SVGGlyph fx:id="glyph2" fill="BLACK" size="35.0"
+                                  style="-fx-shape: 'M832 960l192-512h-832l-192 512zM128 384l-128 576v-832h288l128 128h416v128z'"/>
+                    </graphic>
+                </JFXButton>
+                <JFXTextField fx:id="filePath2" labelFloat="true" maxWidth="1.7976931348623157E308" minWidth="-Infinity"
+                              promptText="Location to Store Mapped Data" style="-fx-font-size: 14" HBox.hgrow="ALWAYS">
+                    <validators>
+                        <RequiredFieldValidator message="Valid Directory Required!">
+                            <FontIcon iconLiteral="fas-exclamation-triangle"/>
+                        </RequiredFieldValidator>
+                    </validators>
+                </JFXTextField>
+            </HBox>
+            <padding>
+                <Insets left="20.0" right="20.0"/>
+            </padding>
+        </VBox>
+        <HBox alignment="CENTER_LEFT" maxWidth="Infinity" spacing="15.0">
+            <VBox alignment="CENTER_LEFT" maxWidth="Infinity" spacing="5" HBox.hgrow="ALWAYS">
+                <JFXProgressBar fx:id="progressBar" maxWidth="1.7976931348623157E308" progress="0.0" visible="false"/>
+                <Label fx:id="progress" text="Text" style="-fx-font-size: 14"/>
+                <padding>
+                    <Insets left="20.0" right="20.0"/>
+                </padding>
+            </VBox>
+        </HBox>
+        <HBox alignment="CENTER" spacing="50">
+            <JFXButton fx:id="processButton" alignment="CENTER" buttonType="RAISED" contentDisplay="CENTER"
+                       defaultButton="true" minWidth="80" style="-fx-background-color: #0064ff; -fx-text-fill: white"
+                       text="Process"/>
+            <JFXButton fx:id="mainCancelButton" alignment="CENTER" buttonType="RAISED"
+                       contentDisplay="CENTER" minWidth="80" style="-fx-background-color: white" text="Cancel"/>
+        </HBox>
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+    </VBox>
+    <stylesheets>
+        <URL value="@../css/jfoenix-fonts.css"/>
+        <URL value="@../css/jfoenix-design.css"/>
+        <URL value="@../css/styling.css"/>
+    </stylesheets>
+</StackPane>

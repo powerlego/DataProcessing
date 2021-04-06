@@ -1,0 +1,16 @@
+# Project exclude paths
+/target/
+/mapped data/
+/logs/
+/jre/
+/installers/
+/dataDebug/
+/data/
+/corrections/
+/sql1.txt
+/sql2.txt
+/sql3.txt
+/sql4.txt
+/sql5.txt
+/setup.bat
+/jre/

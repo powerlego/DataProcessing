@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="fixed everything" />
+    <list id="f8617058-69cc-42af-8bf3-2f8d9d7f275b" name="Revert &quot;Initial commit&quot;" comment="Revert &quot;Initial commit&quot;&#10;&#10;This reverts commit 63715dbe" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="module-info" />
+        <option value="FxmlFile" />
+        <option value="Class" />
+        <option value="Mapper Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="skipTests" value="true" />
+  </component>
+  <component name="ProjectId" id="1pAHMevkwJwXMyTYplfmXjhXm1g" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="DatabaseDriversLRU" value="sqlserver" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="database.data.extractors.current.export.id" value="Excel (xlsx)" />
+    <property name="database.data.extractors.current.id" value="Pretty-Groovy.txt.groovy" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/mapped data/POR" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Problems" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\nicho\Documents\DataProcessing\mapped data\POR" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\src\main\resources\templates" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\src\main\resources\org\dataprocessing\resources\templates" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\dataDebug" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\src\main\resources" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\nicho\Documents\DataProcessing\src\main\java\org\dataprocessing\gui\controller" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\src\main\resources\fxml" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\data" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing\debugging files" />
+      <recent name="C:\Users\nicho\Documents\DataProcessing" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.vendoradder" />
+      <recent name="" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.dataprocessing.backend.mappers.custom" />
+      <recent name="org.dataprocessing.datafx" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Maven.Run GUI">
+    <configuration name="DataProcessing-4.0.0.0.jar" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/target/DataProcessing-4.0.0.0.jar" />
+      <method v="2" />
+    </configuration>
+    <configuration name="DataProcessing [clean]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug Call Log" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="package" />
+                <option value="exec:java" />
+                <option value="-Dexec.args=debug callLog" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug Database Map" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="package" />
+                <option value="exec:java" />
+                <option value="-Dexec.args=debug database" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug POR Database" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="package" />
+                <option value="exec:java" />
+                <option value="-Dexec.args=debug sqlDatabase" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="Run GUI" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="compile" />
+                <option value="exec:java" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="build" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="package" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="JAR Application.DataProcessing-4.0.0.0.jar" />
+      <item itemvalue="Maven.DataProcessing [clean]" />
+      <item itemvalue="Maven.Debug Call Log" />
+      <item itemvalue="Maven.Debug Database Map" />
+      <item itemvalue="Maven.Debug POR Database" />
+      <item itemvalue="Maven.Run GUI" />
+      <item itemvalue="Maven.build" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JAR Application.DataProcessing-4.0.0.0.jar" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="" />
+      <created>1614618927942</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1614618927942</updated>
+      <workItem from="1614618929054" duration="18963000" />
+      <workItem from="1614639411414" duration="113000" />
+      <workItem from="1614692092530" duration="30323000" />
+      <workItem from="1614736029729" duration="41000" />
+      <workItem from="1614737441527" duration="3585000" />
+      <workItem from="1614779765908" duration="804000" />
+      <workItem from="1614793097502" duration="2567000" />
+      <workItem from="1614800000010" duration="11874000" />
+      <workItem from="1614865607942" duration="1340000" />
+      <workItem from="1614867582593" duration="9112000" />
+      <workItem from="1614883081848" duration="1404000" />
+      <workItem from="1614885358393" duration="17805000" />
+      <workItem from="1614913659218" duration="1938000" />
+      <workItem from="1614948373355" duration="923000" />
+      <workItem from="1614951285176" duration="314000" />
+      <workItem from="1614951754524" duration="33044000" />
+      <workItem from="1615041479362" duration="20252000" />
+      <workItem from="1615211312818" duration="5861000" />
+      <workItem from="1615217263390" duration="25000" />
+      <workItem from="1615217332519" duration="12026000" />
+      <workItem from="1615229508251" duration="8351000" />
+      <workItem from="1615237996087" duration="7103000" />
+      <workItem from="1615297130639" duration="32357000" />
+      <workItem from="1615382542720" duration="34864000" />
+      <workItem from="1615469651865" duration="32850000" />
+      <workItem from="1615556170551" duration="12550000" />
+      <workItem from="1615575413705" duration="12311000" />
+      <workItem from="1615643321965" duration="7217000" />
+      <workItem from="1615657151330" duration="1312000" />
+      <workItem from="1615811288534" duration="11048000" />
+      <workItem from="1615822490484" duration="21985000" />
+      <workItem from="1615897579168" duration="35339000" />
+      <workItem from="1615985478237" duration="27000" />
+      <workItem from="1615985574907" duration="17215000" />
+      <workItem from="1616011329519" duration="2746000" />
+      <workItem from="1616016514777" duration="402000" />
+      <workItem from="1616017085372" duration="1274000" />
+      <workItem from="1616070315222" duration="1613000" />
+      <workItem from="1616072832254" duration="18954000" />
+      <workItem from="1616156671529" duration="28340000" />
+      <workItem from="1616415866098" duration="443000" />
+      <workItem from="1616416795950" duration="32387000" />
+      <workItem from="1616502536142" duration="17234000" />
+      <workItem from="1616524782647" duration="9401000" />
+      <workItem from="1616588541210" duration="5905000" />
+      <workItem from="1616594771507" duration="2594000" />
+      <workItem from="1616600563955" duration="976000" />
+      <workItem from="1616602191266" duration="13150000" />
+      <workItem from="1616688410754" duration="2027000" />
+      <workItem from="1616691588393" duration="1139000" />
+      <workItem from="1616692759205" duration="10929000" />
+      <workItem from="1616762569681" duration="24656000" />
+      <workItem from="1616790889675" duration="20000" />
+      <workItem from="1617020829189" duration="4483000" />
+      <workItem from="1617037802457" duration="628000" />
+      <workItem from="1617106935784" duration="592000" />
+      <workItem from="1617108968912" duration="28000" />
+      <workItem from="1617197882439" duration="47000" />
+      <workItem from="1617203068740" duration="595000" />
+      <workItem from="1617206738814" duration="1247000" />
+      <workItem from="1617399301139" duration="615000" />
+      <workItem from="1617638088806" duration="1875000" />
+      <workItem from="1617750148345" duration="401000" />
+      <workItem from="1617750624893" duration="67000" />
+      <workItem from="1617750814644" duration="12000" />
+      <workItem from="1617750974930" duration="1459000" />
+      <workItem from="1617752468923" duration="14000" />
+    </task>
+    <task id="LOCAL-00001" summary="Updated .gitignore">
+      <created>1617638919949</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1617638919949</updated>
+    </task>
+    <task id="LOCAL-00002" summary="fixed everything">
+      <created>1617751994495</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1617751994495</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.log" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <ignored-roots>
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+    <MESSAGE value="Updated .gitignore" />
+    <MESSAGE value="fixed everything" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed everything" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint type="java-exception">
+          <properties class="java.lang.ArrayIndexOutOfBoundsException" package="java.lang" />
+          <option name="timeStamp" value="10" />
+        </breakpoint>
+        <breakpoint type="java-exception">
+          <properties class="java.lang.NumberFormatException" package="java.lang" />
+          <option name="timeStamp" value="19" />
+        </breakpoint>
+        <line-breakpoint type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java</url>
+          <line>526</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/FileUtils.java</url>
+          <line>335</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="java.util.HashMap$Node" memberName="key" />
+        <PinnedItemInfo parentTag="org.dataprocessing.backend.mappers.por.POROpenSales$MapTemplate" memberName="data" />
+      </pinned-members>
+    </pin-to-top-manager>
+    <watches-manager>
+      <configuration name="MavenRunConfiguration">
+        <watch expression="row.get(26)" language="JAVA" />
+        <watch expression="row.get(25)" language="JAVA" />
+        <watch expression="split" language="JAVA" />
+        <watch expression="row.get(33)" language="JAVA" />
+        <watch expression="mapTemplate.getValue()" language="JAVA" />
+        <watch expression="row.get(0).trim().equalsIgnoreCase(data.get(i-1).get(0).trim())" language="JAVA" />
+        <watch expression="data.get(i-1).get(0)" language="JAVA" />
+        <watch expression="row.get(0)" language="JAVA" />
+        <watch expression="row.get(26).trim().substring(0,2)" language="JAVA" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="regexState">
+    <option name="map">
+      <map>
+        <entry key="flags" value="8" />
+        <entry key="mode" value="0" />
+        <entry key="regex" value="^\d{4}-\d{2}-\d{2}(?=[^@])" />
+        <entry key="replacement" value=" " />
+        <entry key="text" value="0086-20-8290-6966@" />
+      </map>
+    </option>
+  </component>
+</project>
