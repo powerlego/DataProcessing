@@ -14,109 +14,142 @@ import org.dataprocessing.utils.MapperUtils;
 import org.dataprocessing.utils.Utils;
 
 import java.nio.file.Path;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Maps the POR Item Master Template
- *
- * @author Nicholas Curl
+ * Maps the POR Item Master Template @author Nicholas Curl
  */
 public class PORItemMaster {
 
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger                 logger    = LogManager.getLogger();
     /**
      * The instance of the FileUtils class
      */
-    private static final FileUtils fileUtils = FileUtils.getInstance();
+    private static final FileUtils              fileUtils = FileUtils.getInstance();
+    private final        Utils                  utils     = Utils.getInstance();
     /**
      * The server table convert task
      */
-    private final ServerTableConvertTask tableConvertTask;
+    private final        ServerTableConvertTask tableConvertTask;
     /**
      * The remove duplicates task
      */
-    private final RemoveDuplicates removeDuplicates;
+    private final        RemoveDuplicates       removeDuplicates;
     /**
      * The remove non-alphanumeric task
      */
-    private final RemoveNonAlphaNum removeNonAlphaNum;
+    private final        RemoveNonAlphaNum      removeNonAlphaNum;
     /**
      * The template mapping task
      */
-    private final MapTemplate mapTemplate;
+    private final        MapTemplate            mapTemplate;
     /**
      * The excel writing task
      */
-    private final FileUtils.XlsxTask writeTask;
+    private final        FileUtils.XlsxTask     writeTask;
     /**
      * The list of sub-tasks
      */
-    private final List<Task<?>> tasks;
+    private final        List<Task<?>>          tasks;
     /**
      * The total progress of this task
      */
-    private final DoubleBinding totalProgress;
+    private final        DoubleBinding          totalProgress;
 
     /**
-     * The constructor for this class
-     *
-     * @param porStoreLocation The path to the directory to store the mapped data
+     * The constructor for this class @param porStoreLocation The path to the directory to store the mapped data
      */
     public PORItemMaster(Path porStoreLocation) {
-        tasks = new LinkedList<>();
+        tasks = new ArrayList<>();
         mapTemplate = new MapTemplate();
         tableConvertTask = new ServerTableConvertTask(
                 "SELECT A.[KEY],\n" +
-                        "       A.Name,\n" +
-                        "       E.DepartmentName AS Department,\n" +
-                        "       A.QTY            AS Quantity,\n" +
-                        "       A.MANF           AS Manufacturer,\n" +
-                        "       A.RMIN           AS [Reorder Min],\n" +
-                        "       A.VendorNumber1,\n" +
-                        "       A.VendorNumber2,\n" +
-                        "       A.VendorNumber3,\n" +
-                        "       A.Weight,\n" +
-                        "       A.PURP           AS [Purchase Price],\n" +
-                        "       A.SELL           AS [Sell Price],\n" +
-                        "       A.CurrentStore,\n" +
-                        "       F.STORE_NAME,\n" +
-                        "       B.Name           AS Category,\n" +
-                        "       A.QYOT           AS Quantity_Rented\n" +
-                        "FROM dbo.ItemFile AS A\n" +
-                        "         LEFT OUTER JOIN dbo.ItemCategory AS B ON A.Category = B.Category\n" +
-                        "         LEFT OUTER JOIN dbo.ItemType AS C ON A.TYPE = C.Type\n" +
-                        "         LEFT OUTER JOIN dbo.ItemDepartment AS E ON A.Department = E.Department\n" +
-                        "         LEFT OUTER JOIN dbo.ParameterFile AS F ON A.CurrentStore = F.Store\n" +
-                        "WHERE A.[KEY] NOT LIKE '.%'\n" +
-                        "  AND A.[KEY] NOT LIKE ':%'\n" +
-                        "  AND A.Inactive = 'false'\n" +
-                        "  AND A.Name NOT LIKE 'Custom Accessory%'"
+                "                A.Name,\n" +
+                "                E.NewDepartmentName As Department,\n" +
+                "                A.QTY               AS Quantity,\n" +
+                "                A.MANF              AS Manufacturer,\n" +
+                "                A.RMIN              AS [Reorder Min],\n" +
+                "                A.VendorNumber1,\n" +
+                "                A.VendorNumber2,\n" +
+                "                A.VendorNumber3,\n" +
+                "                A.Weight,\n" +
+                "                A.PURP              AS [Purchase Price],\n" +
+                "                A.SELL              AS [Sell Price],\n" +
+                "                A.CurrentStore,\n" +
+                "                F.STORE_NAME,\n" +
+                "                B.Name              AS Category,\n" +
+                "                A.QYOT              AS Quantity_Rented,\n" +
+                "                N.AccountNum          AS Income_Account_Num,\n" +
+                "                N.AccountName       AS Income_Account_Name,\n" +
+                "                G.AccountNum        AS COGS_Account_Num,\n" +
+                "                G.AccountName       AS COGS_Account_Name,\n" +
+                "                A.ReplacementCost,\n" +
+                "                12100               as InvAsset,\n" +
+                "                'Inventory Asset'   as InvAssetName,\n" +
+                "                213                 as Inventory_Asset_Internal_Id,\n" +
+                "                N.InternalId        as Income_Internal_ID,\n" +
+                "                G.InternalId        as COGS_Internal_ID\n" +
+                "\n" +
+                "FROM (SELECT *\n" +
+                "      FROM dbo.ItemFile\n" +
+                "      WHERE [KEY] NOT LIKE '.%'\n" +
+                "        AND [KEY] NOT LIKE ':%'\n" +
+                "        AND Inactive = 'false'\n" +
+                "        AND Name NOT LIKE 'Custom Accessory%'\n" +
+                "        AND [KEY] NOT LIKE '%PKG'\n" +
+                "        AND NOT ((NOT (Department = 13 OR Department = 7 OR Department = 10)) AND CurrentStore = '003')\n" +
+                "        AND [KEY] NOT LIKE 'Y%'\n" +
+                "     ) AS A\n" +
+                "         INNER JOIN (SELECT [IF*].Name as JoinName, MAX([IF*].QTY) as JoinQTY\n" +
+                "                     from (SELECT *\n" +
+                "                           FROM dbo.ItemFile\n" +
+                "                           WHERE [KEY] NOT LIKE '.%'\n" +
+                "                             AND [KEY] NOT LIKE ':%'\n" +
+                "                             AND Inactive = 'false'\n" +
+                "                             AND Name NOT LIKE 'Custom Accessory%'\n" +
+                "                             AND [KEY] NOT LIKE '%PKG'\n" +
+                "                             AND NOT ((NOT (Department = 13 OR Department = 7 OR Department = 10)) AND\n" +
+                "                                      CurrentStore = '003')) as [IF*]\n" +
+                "                     group by IIF([IF*].Name NOT like '%Berry%', [IF*].Name, CAST([IF*].QTY as NVARCHAR)), [IF*].Name\n" +
+                ") as H on A.Name = JoinName and A.QTY = H.JoinQTY\n" +
+                "         LEFT OUTER JOIN dbo.ItemCategory AS B ON A.Category = B.Category\n" +
+                "         LEFT OUTER JOIN dbo.ItemType AS C ON A.TYPE = C.Type\n" +
+                "         LEFT OUTER JOIN dbo.DepartmentMapping AS E ON A.Department = E.OldDepartment\n" +
+                "         LEFT OUTER JOIN dbo.ParameterFile AS F ON A.CurrentStore = F.Store\n" +
+                "         LEFT OUTER JOIN (select NAM.OldAccountNum, NAM.InternalId, NA.AccountNum, NA.AccountName\n" +
+                "                          from NewAccountMap as NAM\n" +
+                "                                   INNER JOIN NewAccounts NA on NAM.InternalId = NA.InternalId) AS N\n" +
+                "                         on N.OldAccountNum = B.GLNumber\n" +
+                "         LEFT OUTER JOIN (SELECT DepartmentNum, NA.InternalId, NA.AccountNum, NA.AccountName\n" +
+                "                          from COGS_Association as CA\n" +
+                "                                   INNER JOIN NewAccounts NA on CA.IternalID = NA.InternalId) AS G\n" +
+                "                         ON E.NewDepartment = G.DepartmentNum\n" +
+                "         LEFT OUTER JOIN dbo.NewAccounts AS D ON B.GLNumber = D.AccountNum"
         );
         removeDuplicates = new RemoveDuplicates();
         removeNonAlphaNum = new RemoveNonAlphaNum();
-        writeTask = fileUtils.writeXlsxTask(porStoreLocation.resolve("Item Master Template.xlsx").toFile());
+        writeTask = fileUtils.writeXlsxTask(porStoreLocation.resolve("Inventory Item Template.xlsx").toFile());
         tasks.add(tableConvertTask);
         tasks.add(removeDuplicates);
         tasks.add(removeNonAlphaNum);
         tasks.add(mapTemplate);
         tasks.add(writeTask);
-        totalProgress = Bindings.createDoubleBinding(() -> (
-                        Math.max(0, tableConvertTask.getProgress()) +
-                                Math.max(0, removeDuplicates.getProgress()) +
-                                Math.max(0, removeNonAlphaNum.getProgress()) +
-                                Math.max(0, mapTemplate.getProgress()) +
-                                Math.max(0, writeTask.getProgress())
-                ) / 5,
-                tableConvertTask.progressProperty(),
-                removeDuplicates.progressProperty(),
-                removeNonAlphaNum.progressProperty(),
-                mapTemplate.progressProperty(),
-                writeTask.progressProperty()
+        totalProgress = Bindings.createDoubleBinding(() -> (Math.max(0, tableConvertTask.getProgress()) +
+                                                            Math.max(0, removeDuplicates.getProgress()) +
+                                                            Math.max(0, removeNonAlphaNum.getProgress()) +
+                                                            Math.max(0, mapTemplate.getProgress()) +
+                                                            Math.max(0, writeTask.getProgress())
+                                                           ) / 5,
+                                                     tableConvertTask.progressProperty(),
+                                                     removeDuplicates.progressProperty(),
+                                                     removeNonAlphaNum.progressProperty(),
+                                                     mapTemplate.progressProperty(),
+                                                     writeTask.progressProperty()
         );
     }
 
@@ -138,15 +171,12 @@ public class PORItemMaster {
         return totalProgress.get();
     }
 
-
     /**
-     * Maps the template
-     *
-     * @param executorService The controller thread executor
+     * Maps the template @param executorService The controller thread executor
      */
     public void map(ExecutorService executorService) {
         tableConvertTask.setOnSucceeded(event -> {
-            removeDuplicates.setTable(tableConvertTask.getValue());
+            removeDuplicates.setTable(utils.convertToTableString(tableConvertTask.getValue()));
             executorService.submit(removeDuplicates);
         });
         removeDuplicates.setOnSucceeded(event -> {
@@ -165,9 +195,7 @@ public class PORItemMaster {
     }
 
     /**
-     * Gets the total progress property
-     *
-     * @return The total progress property
+     * Gets the total progress property @return The total progress property
      */
     public DoubleBinding totalProgressProperty() {
         return totalProgress;
@@ -177,34 +205,35 @@ public class PORItemMaster {
      * Maps the data to the Item Master Template
      */
     private static class MapTemplate extends Task<List<List<String>>> {
+
         /**
          * The instance of the Utils class
          */
-        private static final Utils utils = Utils.getInstance();
+        private static final Utils              utils       = Utils.getInstance();
         /**
          * The instance of the MapperUtils class
          */
-        private static final MapperUtils mapperUtils = MapperUtils.getInstance();
+        private static final MapperUtils        mapperUtils = MapperUtils.getInstance();
         /**
          * The instance of SqlServer Class
          */
-        private static final SqlServer server = SqlServer.getInstance();
+        private static final SqlServer          server      = SqlServer.getInstance();
         /**
          * The template associated with this mapping
          */
-        private static final String template = "/templates/Inventory Item Template_MFG FINAL.xlsx";
+        private static final String             template    = "/templates/Inventory Item Template_MFG FINAL.xlsx";
         /**
          * The header of the template
          */
-        private final List<String> header;
+        private final        List<String>       header;
         /**
          * The table that stores the mapped data
          */
-        private final List<List<String>> mapTable;
+        private final        List<List<String>> mapTable;
         /**
          * Local copy of the data to map
          */
-        private List<List<String>> data;
+        private              List<List<String>> data;
 
         /**
          * The constructor for this inner class
@@ -232,7 +261,7 @@ public class PORItemMaster {
                     break;
                 }
                 List<String> row = data.get(i);
-                List<String> mapRow = new LinkedList<>();
+                List<String> mapRow = new ArrayList<>();
                 for (int j = 0; j < header.size(); j++) {
                     if (isCancelled()) {
                         break loopBreak;
@@ -245,12 +274,18 @@ public class PORItemMaster {
                         case 2:
                             mapRow.add(j, row.get(1).trim() + "@");
                             break;
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                            mapRow.add(j, "Each");
+                            break;
                         case 9:
                             mapRow.add(j, "Mahaffey USA");
                             break;
                         case 10:
                         case 14:
-                        case 104:
+                        case 112:
                             mapRow.add(j, "TRUE");
                             break;
                         case 11:
@@ -260,12 +295,16 @@ public class PORItemMaster {
                             String currentStore = row.get(12).trim();
                             if (currentStore.equalsIgnoreCase("003")) {
                                 mapRow.add(j, "Houston Depot");
-                            } else {
+                            }
+                            else if (row.get(2).trim().equalsIgnoreCase("Fort Polk")) {
+                                mapRow.add(j, "Fort Polk");
+                            }
+                            else {
                                 mapRow.add(j, "Memphis");
                             }
                             break;
                         case 15:
-                            mapRow.add(j, "Average");
+                            mapRow.add(j, "Standard");
                             break;
                         case 17:
                             mapRow.add(j, row.get(10).trim());
@@ -282,17 +321,20 @@ public class PORItemMaster {
                         case 48:
                             if (row.get(6).trim().equalsIgnoreCase("0") || row.get(6).trim().equalsIgnoreCase("-1")) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 try {
                                     int vendNum = Integer.parseInt(row.get(6).trim());
                                     String vendName = server.getVendorName(vendNum);
                                     if (vendName == null) {
                                         logger.fatal("Vendor name must not be null.", new NullPointerException());
                                         System.exit(-1);
-                                    } else {
+                                    }
+                                    else {
                                         mapRow.add(j, vendName.trim());
                                     }
-                                } catch (NumberFormatException e) {
+                                }
+                                catch (NumberFormatException e) {
                                     logger.fatal("Unable to parse vendor number.", e);
                                     System.exit(-1);
                                 }
@@ -301,24 +343,28 @@ public class PORItemMaster {
                         case 53:
                             if (row.get(6).trim().equalsIgnoreCase("0")) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, row.get(6).trim() + "#");
                             }
                             break;
                         case 54:
                             if (row.get(7).trim().equalsIgnoreCase("0") || row.get(7).trim().equalsIgnoreCase("-1")) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 try {
                                     int vendNum = Integer.parseInt(row.get(7).trim());
                                     String vendName = server.getVendorName(vendNum);
                                     if (vendName == null) {
                                         logger.fatal("Vendor name must not be null.", new NullPointerException());
                                         System.exit(-1);
-                                    } else {
+                                    }
+                                    else {
                                         mapRow.add(j, vendName.trim());
                                     }
-                                } catch (NumberFormatException e) {
+                                }
+                                catch (NumberFormatException e) {
                                     logger.fatal("Unable to parse vendor number.", e);
                                     System.exit(-1);
                                 }
@@ -327,24 +373,28 @@ public class PORItemMaster {
                         case 59:
                             if (row.get(7).trim().equalsIgnoreCase("0")) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, row.get(7).trim() + "#");
                             }
                             break;
                         case 60:
                             if (row.get(8).trim().equalsIgnoreCase("0") || row.get(8).trim().equalsIgnoreCase("-1")) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 try {
                                     int vendNum = Integer.parseInt(row.get(8).trim());
                                     String vendName = server.getVendorName(vendNum);
                                     if (vendName == null) {
                                         logger.fatal("Vendor name must not be null.", new NullPointerException());
                                         System.exit(-1);
-                                    } else {
+                                    }
+                                    else {
                                         mapRow.add(j, vendName.trim());
                                     }
-                                } catch (NumberFormatException e) {
+                                }
+                                catch (NumberFormatException e) {
                                     logger.fatal("Unable to parse vendor number.", e);
                                     System.exit(-1);
                                 }
@@ -353,7 +403,8 @@ public class PORItemMaster {
                         case 65:
                             if (row.get(8).trim().equalsIgnoreCase("0")) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, row.get(8).trim() + "#");
                             }
                             break;
@@ -369,17 +420,38 @@ public class PORItemMaster {
                         case 83:
                             mapRow.add(j, row.get(11).trim());
                             break;
-                        case 106:
+                        case 96:
+                            mapRow.add(j, row.get(25).trim());
+                            break;
+                        case 97:
+                            mapRow.add(j, row.get(18).trim() + " " + row.get(19).trim());
+                            break;
+                        case 98:
+                            mapRow.add(j, row.get(24).trim());
+                            break;
+                        case 99:
+                            mapRow.add(j, row.get(16).trim() + " " + row.get(17).trim());
+                            break;
+                        case 100:
+                            mapRow.add(j, row.get(23).trim());
+                            break;
+                        case 101:
+                            mapRow.add(j, row.get(21).trim() + " " + row.get(22).trim());
+                            break;
+                        case 114:
                             mapRow.add(j, "FALSE");
                             break;
-                        case 107:
+                        case 115:
                             mapRow.add(j, row.get(3).trim() + "#");
                             break;
-                        case 108:
+                        case 116:
                             mapRow.add(j, row.get(15).trim() + "#");
                             break;
-                        case 109:
+                        case 117:
                             mapRow.add(j, row.get(14).trim());
+                            break;
+                        case 118:
+                            mapRow.add(j, row.get(20).trim() + "$");
                             break;
                         default:
                             mapRow.add(j, "");
@@ -391,6 +463,18 @@ public class PORItemMaster {
                 mapTable.add(mapRow);
                 utils.sleep(1);
             }
+            mapTable.sort((o1, o2) -> {
+                              if (mapTable.indexOf(o1) == 0) {
+                                  return -1;
+                              }
+                              else if (mapTable.indexOf(o2) == 0) {
+                                  return 1;
+                              }
+                              else {
+                                  return o1.get(0).compareTo(o2.get(0));
+                              }
+                          }
+            );
             return mapTable;
         }
 
@@ -405,7 +489,6 @@ public class PORItemMaster {
 
         /**
          * Sets the data to map
-         *
          * @param data The data to map
          */
         public void setData(List<List<String>> data) {

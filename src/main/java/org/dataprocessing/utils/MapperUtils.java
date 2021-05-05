@@ -9,10 +9,10 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author Nicholas Curl
@@ -28,7 +28,7 @@ public class MapperUtils extends Utils {
     }
 
     public List<List<String>> createMapTable(String template) {
-        List<List<String>> mapTable = new LinkedList<>();
+        List<List<String>> mapTable = new ArrayList<>();
         List<String> header = getHeader(template);
         mapTable.add(header);
         return mapTable;
@@ -49,7 +49,7 @@ public class MapperUtils extends Utils {
             wb.close();
         } catch (IOException exception) {
             logger.fatal("Unable to get header", exception);
-            header = new LinkedList<>();
+            header = new ArrayList<>();
         }
         return header;
     }
@@ -59,7 +59,7 @@ public class MapperUtils extends Utils {
         DataFormatter formatter = new DataFormatter();
         Sheet sheet = wb.getSheetAt(1);
         Row row = sheet.getRow(0);
-        List<String> rowList = new LinkedList<>();
+        List<String> rowList = new ArrayList<>();
         int columnCount = sheet.getRow(0).getLastCellNum();
         if (row == null) {
             return createEmptyRow(columnCount);
@@ -72,7 +72,7 @@ public class MapperUtils extends Utils {
 
     public Map<String, String> getCorrections(String correctionsFile) {
         String line;
-        Map<String, String> corrections = new TreeMap<>();
+        Map<String, String> corrections = new HashMap<>();
         try {
             Path path = Paths.get(correctionsFile);
             Path parentPath = path.getParent();

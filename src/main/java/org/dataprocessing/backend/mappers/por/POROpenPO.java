@@ -12,7 +12,7 @@ import org.dataprocessing.utils.MapperUtils;
 import org.dataprocessing.utils.Utils;
 
 import java.nio.file.Path;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -34,11 +34,12 @@ public class POROpenPO {
     /**
      * The template mapping task
      */
-    private final MapTemplate mapTemplate;
+    private final        MapTemplate mapTemplate;
+    private final        Utils utils = Utils.getInstance();
     /**
      * The server table convert task
      */
-    private final ServerTableConvertTask tableConvertTask;
+    private final        ServerTableConvertTask tableConvertTask;
     /**
      * The excel writing task
      */
@@ -58,7 +59,7 @@ public class POROpenPO {
      * @param storeLocation The path to the directory to store the mapped data
      */
     public POROpenPO(Path storeLocation) {
-        tasks = new LinkedList<>();
+        tasks = new ArrayList<>();
         mapTemplate = new MapTemplate();
         tableConvertTask = new ServerTableConvertTask(
                 "SELECT PO.PONumber,\n" +
@@ -130,7 +131,7 @@ public class POROpenPO {
      */
     public void map(ExecutorService executorService) {
         tableConvertTask.setOnSucceeded(event -> {
-            mapTemplate.setData(tableConvertTask.getValue());
+            mapTemplate.setData(utils.convertToTableString(tableConvertTask.getValue()));
             executorService.submit(mapTemplate);
         });
         mapTemplate.setOnSucceeded(event -> {
@@ -213,7 +214,7 @@ public class POROpenPO {
                     break;
                 }
                 List<String> row = data.get(i);
-                List<String> mapRow = new LinkedList<>();
+                List<String> mapRow = new ArrayList<>();
                 for (int j = 0; j < header.size(); j++) {
                     if (isCancelled()) {
                         break loopBreak;
@@ -342,6 +343,18 @@ public class POROpenPO {
                 mapTable.add(mapRow);
                 utils.sleep(1);
             }
+            mapTable.sort((o1, o2) -> {
+                              if (mapTable.indexOf(o1) == 0) {
+                                  return -1;
+                              }
+                              else if (mapTable.indexOf(o2) == 0) {
+                                  return 1;
+                              }
+                              else {
+                                  return o1.get(0).compareTo(o2.get(0));
+                              }
+                          }
+            );
             return mapTable;
         }
 

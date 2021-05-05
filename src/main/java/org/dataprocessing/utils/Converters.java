@@ -3,8 +3,8 @@ package org.dataprocessing.utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,19 +18,6 @@ public class Converters {
      * The instance of the logger
      */
     private static final Logger logger = LogManager.getLogger();
-    /**
-     * The instance of this class
-     */
-    private static final Converters instance = new Converters();
-
-    /**
-     * Gets this class's instance
-     *
-     * @return This class's instance
-     */
-    public static Converters getInstance() {
-        return instance;
-    }
 
     /**
      * Converts List&lt;String[]&gt; Table into List&lt;List&lt;String&gt;&gt; Table
@@ -39,11 +26,21 @@ public class Converters {
      *
      * @return The converted table
      */
-    public List<List<String>> convertTableArrayToTable(List<String[]> table) {
-        List<List<String>> tableNew = new LinkedList<>();
+    public static List<List<String>> convertTableArrayToTableString(List<String[]> table) {
+        List<List<String>> tableNew = new ArrayList<>();
         for (String[] rowArray : table) {
-            List<String> row = Arrays.asList(rowArray.clone());
+            List<String> row = new ArrayList<>(Arrays.asList(rowArray.clone()));
             tableNew.add(row);
+        }
+        return tableNew;
+    }
+
+    public static List<Object[]> convertTableToTableArray(List<List<?>> table) {
+        List<Object[]> tableNew = new ArrayList<>();
+
+        for (List<?> row : table) {
+            Object[] rowArray = row.toArray(new Object[0]);
+            tableNew.add(rowArray);
         }
         return tableNew;
     }
@@ -55,8 +52,9 @@ public class Converters {
      *
      * @return The converted table
      */
-    public List<String[]> convertTableToTableArray(List<List<String>> table) {
-        List<String[]> tableNew = new LinkedList<>();
+    public static List<String[]> convertTableToTableArrayString(List<List<String>> table) {
+        List<String[]> tableNew = new ArrayList<>();
+
         for (List<String> row : table) {
             String[] rowArray = row.toArray(new String[0]);
             tableNew.add(rowArray);

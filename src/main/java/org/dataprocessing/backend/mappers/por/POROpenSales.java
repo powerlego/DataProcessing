@@ -3,19 +3,29 @@ package org.dataprocessing.backend.mappers.por;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.concurrent.Task;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dataprocessing.backend.database.SqlServer;
+import org.dataprocessing.backend.objects.Subassembly;
+import org.dataprocessing.backend.objects.Subassembly.AssemblyItem;
+import org.dataprocessing.backend.tasks.KitMapper;
+import org.dataprocessing.backend.tasks.KitMapper.KitMapping;
 import org.dataprocessing.backend.tasks.ServerTableConvertTask;
 import org.dataprocessing.utils.FileUtils;
+import org.dataprocessing.utils.FileUtils.XlsxTask;
+import org.dataprocessing.utils.FileUtils.XlsxTaskMultiSheet;
 import org.dataprocessing.utils.MapperUtils;
 import org.dataprocessing.utils.Utils;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Maps the POR Open Sales Template
@@ -27,39 +37,54 @@ public class POROpenSales {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger                 logger    = LogManager.getLogger();
     /**
      * The instance of the FileUtils class
      */
-    private static final FileUtils fileUtils = FileUtils.getInstance();
+    private static final FileUtils              fileUtils = FileUtils.getInstance();
+    private static final Utils                  utils     = Utils.getInstance();
     /**
      * The template mapping task
      */
-    private final MapTemplate mapTemplate;
+    private final        MapTemplate            mapTemplate;
     /**
      * The server table convert task
      */
-    private final ServerTableConvertTask tableConvertTask;
+    private final        ServerTableConvertTask tableConvertTask;
     /**
      * The first excel writing task
      */
-    private final FileUtils.XlsxTask writeTask1;
+    private final        XlsxTask               writeTask1;
     /**
      * The second excel writing task
      */
-    private final FileUtils.XlsxTask writeTask2;
+    private final        XlsxTask               writeTask2;
     /**
      * The third excel writing task
      */
-    private final FileUtils.XlsxTask writeTask3;
+    private final        XlsxTask               writeTask3;
+    private final        XlsxTaskMultiSheet     writeTask4;
+    private final        XlsxTaskMultiSheet     writeTask5;
+    private final        XlsxTaskMultiSheet     writeTask6;
     /**
      * The list of sub-tasks
      */
-    private final List<Task<?>> tasks;
+    private final        List<Task<?>>          tasks;
+    private final        GroupSalesOrders       groupSalesOrders;
+    private final        FilterSubassemblies    filterSubassemblies;
+    private final        BreakoutSubassemblies  breakoutSubassemblies;
+    private final        GroupSalesOrders       groupSalesOrders1;
+    private final        FilterSubassemblies    filterSubassemblies1;
+    private final        BreakoutSubassemblies  breakoutSubassemblies1;
+    private final        GroupSalesOrders       groupSalesOrders2;
+    private final        FilterSubassemblies    filterSubassemblies2;
+    private final        BreakoutSubassemblies  breakoutSubassemblies2;
     /**
      * The total progress of this task
      */
-    private final DoubleBinding totalProgress;
+    private final        DoubleBinding          totalProgress;
+    private final        KitMapper              kitMapper;
+    private final        KitMapping             kitMapping;
 
     /**
      * The constructor for this class
@@ -67,108 +92,164 @@ public class POROpenSales {
      * @param storeLocation The path to the directory to store the mapped data
      */
     public POROpenSales(Path storeLocation) {
-        tasks = new LinkedList<>();
+        tasks = new ArrayList<>();
         mapTemplate = new MapTemplate();
         tableConvertTask = new ServerTableConvertTask(
                 "SELECT TransactionItems.CNTR         AS [Contract Number],\n" +
-                        "       CustomerFile.NAME             as [Customer Name],\n" +
-                        "       Transactions.DATE             AS [Transaction Date],\n" +
-                        "       Salesman.Name                 AS [Transaction Sales Rep],\n" +
-                        "       TransactionItems.ITEM         as [Item No],\n" +
-                        "       ItemFile.Name                 as [Item Name],\n" +
-                        "       TransactionItems.QTY,\n" +
-                        "       TransactionItems.PRIC         as [Sales Price],\n" +
-                        "       ItemDepartment.DepartmentName as [Item Department],\n" +
-                        "       ItemFile.CurrentStore         AS [Location],\n" +
-                        "       Transactions.DeliveryDate,\n" +
-                        "       Transactions.DeliveryAddress,\n" +
-                        "       Transactions.DeliveryCity,\n" +
-                        "       Transactions.DeliveryZip,\n" +
-                        "       Transactions.Contact          as [Delivery Contact],\n" +
-                        "       Transactions.ContactPhone     as [Delivery Contact Phone Num],\n" +
-                        "       CustomerFile.Terms,\n" +
-                        "       CustomerFile.BillContact,\n" +
-                        "       CustomerFile.BillPhone,\n" +
-                        "       CustomerFile.BillAddress1,\n" +
-                        "       CustomerFile.BillAddress2,\n" +
-                        "       CustomerFile.BillCityState,\n" +
-                        "       CustomerFile.BillZip,\n" +
-                        "       CustomerFile.BillZip4,\n" +
-                        "       CustomerFile.Email,\n" +
-                        "       CustomerFile.FAX,\n" +
-                        "       TaxTable.TaxDescription,\n" +
-                        "       Transactions.JBPO,\n" +
-                        "       Transactions.Notes,\n" +
-                        "       Transactions.JBID,\n" +
-                        "       TransactionType.TypeName,\n" +
-                        "       TransactionItems.Comments,\n" +
-                        "       Transactions.EventEndDate,\n" +
-                        "       Transactions.ReviewBilling,\n" +
-                        "       TaxTable.TaxRent1,\n" +
-                        "       Transactions.PickupDate,\n" +
-                        "       Transactions.STR\n" +
-                        "FROM TransactionItems\n" +
-                        "         LEFT JOIN Transactions on Transactions.CNTR = TransactionItems.CNTR\n" +
-                        "         LEFT JOIN ItemFile on TransactionItems.ITEM = ItemFile.NUM\n" +
-                        "         LEFT JOIN CustomerFile on Transactions.CUSN = CustomerFile.CNUM\n" +
-                        "         LEFT JOIN ItemDepartment on ItemFile.Department = ItemDepartment.Department\n" +
-                        "         INNER JOIN (SELECT DISTINCT CustomerFile.NAME        as Customer_Name,\n" +
-                        "                                     Transactions.TOTL        as Transaction_Total,\n" +
-                        "                                     Transactions.STAT        as Transaction_Status,\n" +
-                        "                                     Transactions.CNTR        as Transaction_Contract,\n" +
-                        "                                     Transactions.PAID,\n" +
-                        "                                     Transactions.CLDT        as Transaction_Close_Date,\n" +
-                        "                                     Salesman_Cntr.Name       as Contract_Sales_Rep_Name,\n" +
-                        "                                     TransactionType.TypeName as Transaction_Type,\n" +
-                        "                                     Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
-                        "                                     Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
-                        "                                     Transactions.DEPP        as Deprication,\n" +
-                        "                                     CustomerFile.CurrentBalance,\n" +
-                        "                                     CustomerFile.Terms\n" +
-                        "                     FROM Transactions\n" +
-                        "                              LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
-                        "                              LEFT OUTER JOIN Salesman Salesman_Cntr ON Transactions.Salesman = Salesman_Cntr.Number\n" +
-                        "                              LEFT OUTER JOIN CustomerJobSite ON Transactions.JobSite = CustomerJobSite.Number\n" +
-                        "                              LEFT OUTER JOIN TransactionType\n" +
-                        "                                              ON Transactions.TransactionType = TransactionType.TypeNumber\n" +
-                        "                              LEFT OUTER JOIN TransactionOperation\n" +
-                        "                                              ON Transactions.Operation = TransactionOperation.OperationNumber\n" +
-                        "                              LEFT OUTER JOIN ParameterFile ON Transactions.STR = ParameterFile.Store\n" +
-                        "                              LEFT OUTER JOIN Salesman Salesman_jobsite\n" +
-                        "                                              ON CustomerJobSite.Salesman = Salesman_jobsite.Number\n" +
-                        "                              LEFT OUTER JOIN CustomerType ON CustomerFile.Type = CustomerType.Type\n" +
-                        "                              LEFT OUTER JOIN Salesman Salesman_customer\n" +
-                        "                                              ON CustomerFile.Salesman = Salesman_customer.Number\n" +
-                        "                     WHERE (Transactions.TOTL <> Transactions.PAID OR Transactions.DEPP <> 0)\n" +
-                        "                       AND Transactions.Archived = 0\n" +
-                        "                       AND Transactions.PYMT <> N'T'\n" +
-                        "                       AND Transactions.STAT NOT LIKE 'R%'\n" +
-                        "                       AND Transactions.STAT NOT LIKE 'Q%'\n" +
-                        "                       AND Transactions.STAT NOT LIKE 'C%') Q ON Q.Transaction_Contract = TransactionItems.CNTR\n" +
-                        "         LEFT JOIN Salesman on Transactions.Salesman = Salesman.Number\n" +
-                        "         LEFT JOIN TransactionType on Transactions.TransactionType = TransactionType.TypeNumber\n" +
-                        "         LEFT JOIN TaxTable on Transactions.TaxCode = TaxTable.TaxCode\n"
+                "       CustomerFile.NAME             as [Customer Name],\n" +
+                "       Transactions.DATE             AS [Transaction Date],\n" +
+                "       Salesman.Name                 AS [Transaction Sales Rep],\n" +
+                "       ItemFile.[KEY]         as [Item No],\n" +
+                "       ItemFile.Name                 as [Item Name],\n" +
+                "       TransactionItems.QTY,\n" +
+                "       TransactionItems.PRIC         as [Sales Price],\n" +
+                "       ItemDepartment.DepartmentName as [Item Department],\n" +
+                "       ItemFile.CurrentStore         AS [Location],\n" +
+                "       Transactions.DeliveryDate,\n" +
+                "       Transactions.DeliveryAddress,\n" +
+                "       Transactions.DeliveryCity,\n" +
+                "       Transactions.DeliveryZip,\n" +
+                "       Transactions.Contact          as [Delivery Contact],\n" +
+                "       Transactions.ContactPhone     as [Delivery Contact Phone Num],\n" +
+                "       CustomerFile.Terms,\n" +
+                "       CustomerFile.BillContact,\n" +
+                "       CustomerFile.BillPhone,\n" +
+                "       CustomerFile.BillAddress1,\n" +
+                "       CustomerFile.BillAddress2,\n" +
+                "       CustomerFile.BillCityState,\n" +
+                "       CustomerFile.BillZip,\n" +
+                "       CustomerFile.BillZip4,\n" +
+                "       CustomerFile.Email,\n" +
+                "       CustomerFile.FAX,\n" +
+                "       TaxTable.TaxDescription,\n" +
+                "       Transactions.JBPO,\n" +
+                "       Transactions.Notes,\n" +
+                "       Transactions.JBID,\n" +
+                "       TransactionType.TypeName,\n" +
+                "       TransactionItems.Comments,\n" +
+                "       Transactions.EventEndDate,\n" +
+                "       Transactions.ReviewBilling,\n" +
+                "       TaxTable.TaxRent1,\n" +
+                "       Transactions.PickupDate,\n" +
+                "       Transactions.STR\n" +
+                "FROM TransactionItems\n" +
+                "         LEFT JOIN Transactions on Transactions.CNTR = TransactionItems.CNTR\n" +
+                "         LEFT JOIN ItemFile on TransactionItems.ITEM = ItemFile.NUM\n" +
+                "         LEFT JOIN CustomerFile on Transactions.CUSN = CustomerFile.CNUM\n" +
+                "         LEFT JOIN ItemDepartment on ItemFile.Department = ItemDepartment.Department\n" +
+                "         INNER JOIN (SELECT DISTINCT CustomerFile.NAME        as Customer_Name,\n" +
+                "                                     Transactions.TOTL        as Transaction_Total,\n" +
+                "                                     Transactions.STAT        as Transaction_Status,\n" +
+                "                                     Transactions.CNTR        as Transaction_Contract,\n" +
+                "                                     Transactions.PAID,\n" +
+                "                                     Transactions.CLDT        as Transaction_Close_Date,\n" +
+                "                                     Salesman_Cntr.Name       as Contract_Sales_Rep_Name,\n" +
+                "                                     TransactionType.TypeName as Transaction_Type,\n" +
+                "                                     Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
+                "                                     Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
+                "                                     Transactions.DEPP        as Deprication,\n" +
+                "                                     CustomerFile.CurrentBalance,\n" +
+                "                                     CustomerFile.Terms\n" +
+                "                     FROM Transactions\n" +
+                "                              LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
+                "                              LEFT OUTER JOIN Salesman Salesman_Cntr ON Transactions.Salesman = Salesman_Cntr.Number\n" +
+                "                              LEFT OUTER JOIN CustomerJobSite ON Transactions.JobSite = CustomerJobSite.Number\n" +
+                "                              LEFT OUTER JOIN TransactionType\n" +
+                "                                              ON Transactions.TransactionType = TransactionType.TypeNumber\n" +
+                "                              LEFT OUTER JOIN TransactionOperation\n" +
+                "                                              ON Transactions.Operation = TransactionOperation.OperationNumber\n" +
+                "                              LEFT OUTER JOIN ParameterFile ON Transactions.STR = ParameterFile.Store\n" +
+                "                              LEFT OUTER JOIN Salesman Salesman_jobsite\n" +
+                "                                              ON CustomerJobSite.Salesman = Salesman_jobsite.Number\n" +
+                "                              LEFT OUTER JOIN CustomerType ON CustomerFile.Type = CustomerType.Type\n" +
+                "                              LEFT OUTER JOIN Salesman Salesman_customer\n" +
+                "                                              ON CustomerFile.Salesman = Salesman_customer.Number\n" +
+                "                     WHERE (Transactions.TOTL <> Transactions.PAID OR Transactions.DEPP <> 0)\n" +
+                "                       AND Transactions.Archived = 0\n" +
+                "                       AND Transactions.PYMT <> N'T'\n" +
+                "                       AND Transactions.STAT NOT LIKE 'R%'\n" +
+                "                       AND Transactions.STAT NOT LIKE 'Q%'\n" +
+                "                       AND Transactions.STAT NOT LIKE 'C%') Q ON Q.Transaction_Contract = TransactionItems.CNTR\n" +
+                "         LEFT JOIN Salesman on Transactions.Salesman = Salesman.Number\n" +
+                "         LEFT JOIN TransactionType on Transactions.TransactionType = TransactionType.TypeNumber\n" +
+                "         LEFT JOIN TaxTable on Transactions.TaxCode = TaxTable.TaxCode"
         );
+        kitMapper = new KitMapper();
+        kitMapping = (KitMapping) kitMapper.getTasks().get(1);
         writeTask1 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey Tent & Awning.xlsx"));
         writeTask2 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey USA.xlsx"));
         writeTask3 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey USA-Houston.xlsx"));
+        writeTask4 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
+                "Open Sales Template-Filtered Mahaffey Tent & Awning.xlsx"));
+        writeTask5 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
+                "Open Sales Template-Filtered Mahaffey USA.xlsx"));
+        writeTask6 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
+                "Open Sales Template-Filtered Mahaffey USA-Houston.xlsx"));
+        groupSalesOrders = new GroupSalesOrders();
+        filterSubassemblies = new FilterSubassemblies();
+        breakoutSubassemblies = new BreakoutSubassemblies();
+        groupSalesOrders1 = new GroupSalesOrders();
+        filterSubassemblies1 = new FilterSubassemblies();
+        breakoutSubassemblies1 = new BreakoutSubassemblies();
+        groupSalesOrders2 = new GroupSalesOrders();
+        filterSubassemblies2 = new FilterSubassemblies();
+        breakoutSubassemblies2 = new BreakoutSubassemblies();
         tasks.add(tableConvertTask);
         tasks.add(mapTemplate);
+        tasks.addAll(kitMapper.getTasks());
+        tasks.add(groupSalesOrders);
+        tasks.add(filterSubassemblies);
+        tasks.add(breakoutSubassemblies);
+        tasks.add(groupSalesOrders1);
+        tasks.add(filterSubassemblies1);
+        tasks.add(breakoutSubassemblies1);
+        tasks.add(groupSalesOrders2);
+        tasks.add(filterSubassemblies2);
+        tasks.add(breakoutSubassemblies2);
         tasks.add(writeTask1);
         tasks.add(writeTask2);
         tasks.add(writeTask3);
+        tasks.add(writeTask4);
+        tasks.add(writeTask5);
+        tasks.add(writeTask6);
         totalProgress = Bindings.createDoubleBinding(() -> (
-                        Math.max(0, tableConvertTask.getProgress()) +
-                                Math.max(0, mapTemplate.getProgress()) +
-                                Math.max(0, writeTask1.getProgress()) +
-                                Math.max(0, writeTask2.getProgress()) +
-                                Math.max(0, writeTask3.getProgress())
-                ) / 5,
-                tableConvertTask.progressProperty(),
-                mapTemplate.progressProperty(),
-                writeTask1.progressProperty(),
-                writeTask2.progressProperty(),
-                writeTask3.progressProperty()
+                                                                   Math.max(0, tableConvertTask.getProgress()) +
+                                                                   Math.max(0, mapTemplate.getProgress()) +
+                                                                   Math.max(0, kitMapper.getTotalProgress()) +
+                                                                   Math.max(0, groupSalesOrders.getProgress()) +
+                                                                   Math.max(0, filterSubassemblies.getProgress()) +
+                                                                   Math.max(0, breakoutSubassemblies.getProgress()) +
+                                                                   Math.max(0, groupSalesOrders1.getProgress()) +
+                                                                   Math.max(0, filterSubassemblies1.getProgress()) +
+                                                                   Math.max(0, breakoutSubassemblies1.getProgress()) +
+                                                                   Math.max(0, groupSalesOrders2.getProgress()) +
+                                                                   Math.max(0, filterSubassemblies2.getProgress()) +
+                                                                   Math.max(0, breakoutSubassemblies2.getProgress()) +
+                                                                   Math.max(0, writeTask1.getProgress()) +
+                                                                   Math.max(0, writeTask2.getProgress()) +
+                                                                   Math.max(0, writeTask3.getProgress()) +
+                                                                   Math.max(0, writeTask4.getProgress()) +
+                                                                   Math.max(0, writeTask5.getProgress()) +
+                                                                   Math.max(0, writeTask6.getProgress())
+                                                           ) / 11,
+                                                     tableConvertTask.progressProperty(),
+                                                     mapTemplate.progressProperty(),
+                                                     kitMapper.totalProgressProperty(),
+                                                     groupSalesOrders.progressProperty(),
+                                                     filterSubassemblies.progressProperty(),
+                                                     breakoutSubassemblies.progressProperty(),
+                                                     groupSalesOrders1.progressProperty(),
+                                                     filterSubassemblies1.progressProperty(),
+                                                     breakoutSubassemblies1.progressProperty(),
+                                                     groupSalesOrders2.progressProperty(),
+                                                     filterSubassemblies2.progressProperty(),
+                                                     breakoutSubassemblies2.progressProperty(),
+                                                     writeTask1.progressProperty(),
+                                                     writeTask2.progressProperty(),
+                                                     writeTask3.progressProperty(),
+                                                     writeTask4.progressProperty(),
+                                                     writeTask5.progressProperty(),
+                                                     writeTask6.progressProperty()
         );
     }
 
@@ -192,11 +273,10 @@ public class POROpenSales {
 
     /**
      * Maps the template
-     *
-     * @param executorService The controller thread executor
      */
-    public void map(ExecutorService executorService) {
-        tableConvertTask.setOnSucceeded(event -> {
+    public void map() {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        kitMapping.setOnSucceeded(event -> {
             mapTemplate.setData(tableConvertTask.getValue());
             executorService.submit(mapTemplate);
         });
@@ -204,12 +284,108 @@ public class POROpenSales {
             writeTask1.setTable(mapTemplate.getValue().get(0));
             writeTask2.setTable(mapTemplate.getValue().get(1));
             writeTask3.setTable(mapTemplate.getValue().get(2));
+            groupSalesOrders.setData(mapTemplate.getValue().get(0));
+            groupSalesOrders1.setData(mapTemplate.getValue().get(1));
+            groupSalesOrders2.setData(mapTemplate.getValue().get(2));
             executorService.submit(writeTask1);
+        });
+        writeTask3.setOnSucceeded(event -> executorService.submit(groupSalesOrders));
+        groupSalesOrders.setOnSucceeded(event -> {
+            filterSubassemblies.setData(groupSalesOrders.getValue());
+            filterSubassemblies.setKits(kitMapping.getValue());
+            executorService.submit(filterSubassemblies);
+        });
+        filterSubassemblies.setOnSucceeded(event -> {
+            breakoutSubassemblies.setData(filterSubassemblies.getValue());
+            breakoutSubassemblies.setKits(kitMapping.getValue());
+            executorService.submit(breakoutSubassemblies);
+        });
+        breakoutSubassemblies.setOnSucceeded(event -> {
+            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies.getValue()
+                                                                                                          .values()),
+                                                                       0
+            );
+            table.add(0, mapTemplate.getHeader());
+            List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies.getValue().values());
+            writeTask4.setSheets(addBreakoutHeader(table, breakoutTable));
+            executorService.submit(writeTask4);
+        });
+        writeTask4.setOnSucceeded(event -> executorService.submit(groupSalesOrders1));
+        groupSalesOrders1.setOnSucceeded(event -> {
+            filterSubassemblies1.setData(groupSalesOrders1.getValue());
+            filterSubassemblies1.setKits(kitMapping.getValue());
+            executorService.submit(filterSubassemblies1);
+        });
+        filterSubassemblies1.setOnSucceeded(event -> {
+            breakoutSubassemblies1.setData(filterSubassemblies1.getValue());
+            breakoutSubassemblies1.setKits(kitMapping.getValue());
+            executorService.submit(breakoutSubassemblies1);
+        });
+        breakoutSubassemblies1.setOnSucceeded(event -> {
+            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies1.getValue()
+                                                                                                           .values()),
+                                                                       0
+            );
+            table.add(0, mapTemplate.getHeader());
+            List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies1.getValue().values());
+            writeTask5.setSheets(addBreakoutHeader(table, breakoutTable));
+            executorService.submit(writeTask5);
 
+        });
+        writeTask5.setOnSucceeded(event -> executorService.submit(groupSalesOrders2));
+        groupSalesOrders2.setOnSucceeded(event -> {
+            filterSubassemblies2.setData(groupSalesOrders2.getValue());
+            filterSubassemblies2.setKits(kitMapping.getValue());
+            executorService.submit(filterSubassemblies2);
+        });
+        filterSubassemblies2.setOnSucceeded(event -> {
+            breakoutSubassemblies2.setData(filterSubassemblies2.getValue());
+            breakoutSubassemblies2.setKits(kitMapping.getValue());
+            executorService.submit(breakoutSubassemblies2);
+        });
+        breakoutSubassemblies2.setOnSucceeded(event -> {
+            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies2.getValue()
+                                                                                                           .values()),
+                                                                       0
+            );
+            table.add(0, mapTemplate.getHeader());
+            List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies2.getValue().values());
+            writeTask6.setSheets(addBreakoutHeader(table, breakoutTable));
+            executorService.submit(writeTask6);
+        });
+        writeTask6.setOnSucceeded(event -> {
+            totalProgress.add(0.0001);
+            executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                    logger.warn("Termination Timeout");
+                }
+            }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         });
         writeTask1.setOnSucceeded(event -> executorService.submit(writeTask2));
         writeTask2.setOnSucceeded(event -> executorService.submit(writeTask3));
         executorService.submit(tableConvertTask);
+        kitMapper.map(executorService);
+    }
+
+    private Map<String, List<List<String>>> addBreakoutHeader(List<List<String>> table,
+                                                              List<List<String>> breakoutTable
+    ) {
+        List<String> header = new ArrayList<>();
+        header.add("contractId");
+        header.add("parentKey");
+        header.add("itemKey");
+        header.add("itemName");
+        header.add("itemQty");
+        header.add("subAssemblyTotalQty");
+        breakoutTable.add(0, header);
+        Map<String, List<List<String>>> sheets = new HashMap<>();
+        sheets.put("Mapped", table);
+        sheets.put("Breakout", breakoutTable);
+        return sheets;
     }
 
     /**
@@ -229,52 +405,53 @@ public class POROpenSales {
         /**
          * The instance of the Utils class
          */
-        private static final Utils utils = Utils.getInstance();
+        private static final Utils                    utils           = Utils.getInstance();
         /**
          * The instance of the MapperUtils class
          */
-        private static final MapperUtils mapperUtils = MapperUtils.getInstance();
+        private static final MapperUtils              mapperUtils     = MapperUtils.getInstance();
         /**
          * The instance of SqlServer Class
          */
-        private static final SqlServer server = SqlServer.getInstance();
+        private static final SqlServer                server          = SqlServer.getInstance();
         /**
          * The template associated with this mapping
          */
-        private static final String template = "/templates/Open Sales Order Template_MFG FINAL.xlsx";
+        private static final String                   template
+                                                                      = "/templates/Open Sales Order Template_MFG FINAL.xlsx";
         /**
          * The corrections file associated with this mapping
          */
-        private static final String correctionsFile = "./corrections/por.txt";
-        private static final Logger logger = LogManager.getLogger();
+        private static final String                   correctionsFile = "./corrections/por.txt";
+        private static final Logger                   logger          = LogManager.getLogger();
         /**
          * The header of the template
          */
-        private final List<String> header;
+        private final        List<String>             header;
         /**
          * The map containing the incorrect string and its correction
          */
-        private final Map<String, String> corrections;
+        private final        Map<String, String>      corrections;
         /**
          * The table that stores the mapped data for store 1
          */
-        private final List<List<String>> mapTable1;
+        private final        List<List<String>>       mapTable1;
         /**
          * The table that stores the mapped data for store 2
          */
-        private final List<List<String>> mapTable2;
+        private final        List<List<String>>       mapTable2;
         /**
          * The table that stores the mapped data for store 3
          */
-        private final List<List<String>> mapTable3;
+        private final        List<List<String>>       mapTable3;
         /**
          * The list of tables for every store listed in POR
          */
-        private final List<List<List<String>>> tables;
+        private final        List<List<List<String>>> tables;
         /**
          * Local copy of the data to map
          */
-        private List<List<String>> data;
+        private              List<List<?>>            data;
 
         /**
          * The constructor for this inner class
@@ -285,7 +462,7 @@ public class POROpenSales {
             mapTable2 = mapperUtils.createMapTable(template);
             mapTable3 = mapperUtils.createMapTable(template);
             corrections = mapperUtils.getCorrections(correctionsFile);
-            tables = new LinkedList<>();
+            tables = new ArrayList<>();
         }
 
         /**
@@ -297,18 +474,30 @@ public class POROpenSales {
          */
         @Override
         protected List<List<List<String>>> call() throws Exception {
+            List<List<String>> mapTable1Temp = new ArrayList<>();
+            List<List<String>> mapTable2Temp = new ArrayList<>();
+            List<List<String>> mapTable3Temp = new ArrayList<>();
             String[] split;
             String dateString;
             double progress = 0.0;
             updateProgress(0, 1.0);
-            double progressUpdate = 1.0 / (data.size() - 1) / header.size();
+            data.remove(0);
+            double progressUpdate = 1.0 / data.size() / header.size();
+            List<List<?>> dataTemp = data.parallelStream()
+                                         .sorted(Comparator.comparing((List<?> o) -> (String) o.get(0))
+                                                           .thenComparing((List<?> o) -> (BigDecimal) o.get(7),
+                                                                          Comparator.reverseOrder()
+                                                           )
+                                                           .thenComparing((List<?> o) -> (String) o.get(4)))
+                                         .collect(Collectors.toList());
+            List<List<String>> dataTempString = utils.convertToTableString(dataTemp);
             loopBreak:
-            for (int i = 1; i < data.size(); i++) {
+            for (int i = 0; i < dataTempString.size(); i++) {
                 if (isCancelled()) {
                     break;
                 }
-                List<String> row = data.get(i);
-                List<String> mapRow = new LinkedList<>();
+                List<String> row = dataTempString.get(i);
+                List<String> mapRow = new ArrayList<>();
                 for (int j = 0; j < header.size(); j++) {
                     if (isCancelled()) {
                         break loopBreak;
@@ -328,7 +517,8 @@ public class POROpenSales {
                         case 4:
                             if (row.get(33).trim().equalsIgnoreCase("1")) {
                                 mapRow.add(j, "Review Billing");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, "Open");
                             }
                             break;
@@ -336,18 +526,21 @@ public class POROpenSales {
                             dateString = row.get(32).trim();
                             if (dateString.contains("1899-12-30")) {
                                 mapRow.add(j, row.get(35).trim());
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, dateString);
                             }
                             break;
                         case 8:
-                            if (i != 1) {
-                                if (row.get(0).trim().equalsIgnoreCase(data.get(i - 1).get(0).trim())) {
+                            if (i != 0) {
+                                if (row.get(0).trim().equalsIgnoreCase(dataTempString.get(i - 1).get(0).trim())) {
                                     mapRow.add(j, "");
-                                } else {
+                                }
+                                else {
                                     mapRow.add(j, row.get(28).trim() + "^");
                                 }
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, row.get(28).trim() + "^");
                             }
                             break;
@@ -355,7 +548,8 @@ public class POROpenSales {
                             mapRow.add(j, row.get(3).trim());
                             break;
                         case 21:
-                            mapRow.add(j, row.get(4).trim() + "#");
+                            String itemKey = row.get(4).trim();
+                            mapRow.add(j, itemKey);
                             break;
                         case 22:
                             mapRow.add(j, row.get(6).trim() + "#");
@@ -365,7 +559,8 @@ public class POROpenSales {
                                 double amount = Double.parseDouble(row.get(7).trim());
                                 if (amount == 0) {
                                     mapRow.add(j, row.get(7).trim());
-                                } else {
+                                }
+                                else {
                                     double qty = Double.parseDouble(row.get(6).trim());
                                     double result = amount / qty;
                                     if (Double.isNaN(result) || Double.isInfinite(result)) {
@@ -374,7 +569,8 @@ public class POROpenSales {
                                     }
                                     mapRow.add(j, utils.round(result, 2) + "$");
                                 }
-                            } catch (NumberFormatException ignored) {
+                            }
+                            catch (NumberFormatException ignored) {
                             }
                             break;
                         case 26:
@@ -394,7 +590,8 @@ public class POROpenSales {
                             String currentStore = row.get(9).trim();
                             if (currentStore.equalsIgnoreCase("003")) {
                                 mapRow.add(j, "Houston Depot");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, "Memphis");
                             }
                             break;
@@ -402,7 +599,8 @@ public class POROpenSales {
                             dateString = row.get(10).trim();
                             if (dateString.contains("1899-12-30")) {
                                 mapRow.add(j, row.get(2).trim());
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, dateString);
                             }
                             break;
@@ -414,7 +612,8 @@ public class POROpenSales {
                             mapRow.add(j, split[0]);
                             try {
                                 mapRow.add(j + 1, split[1]);
-                            } catch (IndexOutOfBoundsException e) {
+                            }
+                            catch (IndexOutOfBoundsException e) {
                                 mapRow.add(j + 1, "");
                             }
                             break;
@@ -423,7 +622,8 @@ public class POROpenSales {
                             mapRow.add(j, split[0]);
                             try {
                                 mapRow.add(j + 1, split[1]);
-                            } catch (IndexOutOfBoundsException e) {
+                            }
+                            catch (IndexOutOfBoundsException e) {
                                 mapRow.add(j + 1, "");
                             }
                             break;
@@ -460,7 +660,8 @@ public class POROpenSales {
                                 split = corrections.get(row.get(21).trim()).split(",");
                                 mapRow.add(j, split[0].trim());
                                 mapRow.add(j + 1, split[1].trim());
-                            } else {
+                            }
+                            else {
                                 split = row.get(21).split(",");
                                 mapRow.add(j, split[0].trim());
                                 mapRow.add(j + 1, split[1].trim());
@@ -469,9 +670,11 @@ public class POROpenSales {
                         case 57:
                             if (utils.isBlankString(row.get(23))) {
                                 mapRow.add(j, row.get(22));
-                            } else if (utils.isBlankString(row.get(22)) && utils.isBlankString(row.get(23))) {
+                            }
+                            else if (utils.isBlankString(row.get(22)) && utils.isBlankString(row.get(23))) {
                                 mapRow.add(j, "");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, row.get(22) + "-" + row.get(23));
                             }
                             break;
@@ -520,23 +723,25 @@ public class POROpenSales {
                             mapRow.add(j, "");
                             break;
                     }
-
                     progress += progressUpdate;
                     updateProgress(progress, 1.0);
                 }
                 switch (row.get(36).trim()) {
                     case "001":
-                        mapTable1.add(mapRow);
+                        mapTable1Temp.add(mapRow);
                         break;
                     case "002":
-                        mapTable2.add(mapRow);
+                        mapTable2Temp.add(mapRow);
                         break;
                     case "003":
-                        mapTable3.add(mapRow);
+                        mapTable3Temp.add(mapRow);
                         break;
                 }
                 utils.sleep(1);
             }
+            mapTable1.addAll(utils.parallelSortListAscending(mapTable1Temp, 0));
+            mapTable2.addAll(utils.parallelSortListAscending(mapTable2Temp, 0));
+            mapTable3.addAll(utils.parallelSortListAscending(mapTable3Temp, 0));
             tables.add(mapTable1);
             tables.add(mapTable2);
             tables.add(mapTable3);
@@ -552,13 +757,278 @@ public class POROpenSales {
             System.exit(-1);
         }
 
+        public List<String> getHeader() {
+            return header;
+        }
+
         /**
          * Sets the data to map
          *
          * @param data The data to map
          */
+        public void setData(List<List<?>> data) {
+            this.data = data;
+        }
+    }
+
+
+    private static class GroupSalesOrders extends Task<MultiValuedMap<String, List<String>>> {
+
+        private List<List<String>> data;
+
+        /**
+         * Invoked when the Task is executed, the call method must be overridden and
+         * implemented by subclasses. The call method actually performs the
+         * background thread logic. Only the updateProgress, updateMessage, updateValue and
+         * updateTitle methods of Task may be called from code within this method.
+         * Any other interaction with the Task from the background thread will result
+         * in runtime exceptions.
+         *
+         * @return The result of the background work, if any.
+         *
+         * @throws Exception an unhandled exception which occurred during the
+         *                   background operation
+         */
+        @Override
+        protected MultiValuedMap<String, List<String>> call() throws Exception {
+            MultiValuedMap<String, List<String>> groupedMap = new ArrayListValuedHashMap<>();
+            double progress = 0.0;
+            updateProgress(progress, 1.0);
+            double progressUpdate = 1.0 / data.size();
+            for (List<String> list : data) {
+                if (data.indexOf(list) == 0) {
+                    progress += progressUpdate;
+                    updateProgress(progress, 1.0);
+                    utils.sleep(1);
+                    continue;
+                }
+                groupedMap.put(list.get(0), list);
+                progress += progressUpdate;
+                updateProgress(progress, 1.0);
+                utils.sleep(1);
+            }
+            return groupedMap;
+        }
+
         public void setData(List<List<String>> data) {
             this.data = data;
+        }
+    }
+
+    private static class FilterSubassemblies extends Task<MultiValuedMap<String, List<String>>> {
+
+        private MultiValuedMap<String, List<String>> data;
+        private Map<String, Subassembly>             kits;
+
+        /**
+         * Invoked when the Task is executed, the call method must be overridden and
+         * implemented by subclasses. The call method actually performs the
+         * background thread logic. Only the updateProgress, updateMessage, updateValue and
+         * updateTitle methods of Task may be called from code within this method.
+         * Any other interaction with the Task from the background thread will result
+         * in runtime exceptions.
+         *
+         * @return The result of the background work, if any.
+         *
+         * @throws Exception an unhandled exception which occurred during the
+         *                   background operation
+         */
+        @Override
+        protected MultiValuedMap<String, List<String>> call() throws Exception {
+            double progress = 0.0;
+            updateProgress(progress, 1.0);
+            double progressUpdate = 1.0 / data.keySet().size();
+            MultiValuedMap<String, List<String>> filteredTable = new ArrayListValuedHashMap<>();
+            for (String salesOrder : data.keySet()) {
+                if (isCancelled()) {
+                    break;
+                }
+                List<List<String>> tempTable = new ArrayList<>(data.get(salesOrder));
+                List<List<String>> filteredKits = filterKits(tempTable);
+                for (List<String> filteredKit : filteredKits) {
+                    String assemblyKey = filteredKit.get(21);
+                    removeComponents(tempTable, kits.get(assemblyKey));
+                }
+                filteredTable.putAll(salesOrder, tempTable);
+                progress += progressUpdate;
+                updateProgress(progress, 1.0);
+                utils.sleep(1);
+            }
+            return filteredTable;
+        }
+
+        @Override
+        protected void failed() {
+            logger.fatal("removing failed", getException());
+            System.exit(1);
+        }
+
+        private List<List<String>> filterKits(List<List<String>> table) {
+            List<List<String>> filtered = new ArrayList<>();
+            for (List<String> row : table) {
+                String itemKey = row.get(21);
+                if (kits.containsKey(itemKey)) {
+                    filtered.add(row);
+                }
+            }
+            return filtered;
+        }
+
+        private void removeComponents(List<List<String>> tempTable, Subassembly subassembly) {
+            for (AssemblyItem assemblyItem : subassembly.getAssemblyItems()) {
+                if (isCancelled()) {
+                    break;
+                }
+                if (assemblyItem.isSubassembly()) {
+                    removeItem(tempTable, assemblyItem);
+                    removeComponents(tempTable, kits.get(assemblyItem.getItemKey()));
+                }
+                else {
+                    removeItem(tempTable, assemblyItem);
+                }
+            }
+        }
+
+        private void removeItem(List<List<String>> tempTable, AssemblyItem assemblyItem) {
+            for (Iterator<List<String>> iterator = tempTable.iterator(); iterator.hasNext(); ) {
+                List<String> strings = iterator.next();
+                if (isCancelled()) {
+                    break;
+                }
+                if (strings.get(21).toLowerCase().contains(assemblyItem.getItemKey().toLowerCase())) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        public void setData(MultiValuedMap<String, List<String>> data) {
+            this.data = data;
+        }
+
+        public void setKits(Map<String, Subassembly> kits) {
+            this.kits = kits;
+        }
+    }
+
+    private static class BreakoutSubassemblies extends Task<MultiValuedMap<String, List<String>>> {
+
+        private MultiValuedMap<String, List<String>> data;
+        private Map<String, Subassembly>             kits;
+
+        // Row format | contractNum | parentKey | itemKey | itemName | qty| subAssemblyTotalQty
+        private void breakoutRecurse(MultiValuedMap<String, List<String>> breakoutList,
+                                     Subassembly subassembly,
+                                     String contractNum,
+                                     int qty,
+                                     Map<String, Integer> grandTotal
+        ) {
+            for (AssemblyItem assemblyItem : subassembly.getAssemblyItems()) {
+                if (isCancelled()) {
+                    break;
+                }
+                List<String> row = new ArrayList<>();
+                row.add(contractNum);
+                row.add(subassembly.getAssemblyKey());
+                row.add(assemblyItem.getItemKey());
+                row.add(assemblyItem.getName());
+                row.add((double) assemblyItem.getQty() + "#");
+                row.add((double) (assemblyItem.getQty() * qty) + "#");
+                breakoutList.put(contractNum, row);
+                if (assemblyItem.isSubassembly()) {
+                    Subassembly subassembly1 = kits.get(assemblyItem.getItemKey());
+                    breakoutRecurse(breakoutList, subassembly1, contractNum, qty * assemblyItem.getQty(), grandTotal);
+                }
+                else {
+                    if (grandTotal.containsKey(assemblyItem.getItemKey())) {
+                        int total = grandTotal.get(assemblyItem.getItemKey());
+                        total += (qty * assemblyItem.getQty());
+                        grandTotal.put(assemblyItem.getItemKey(), total);
+                    }
+                    else {
+                        grandTotal.put(assemblyItem.getItemKey(), qty * assemblyItem.getQty());
+                    }
+                }
+            }
+        }
+
+        /**
+         * Invoked when the Task is executed, the call method must be overridden and
+         * implemented by subclasses. The call method actually performs the
+         * background thread logic. Only the updateProgress, updateMessage, updateValue and
+         * updateTitle methods of Task may be called from code within this method.
+         * Any other interaction with the Task from the background thread will result
+         * in runtime exceptions.
+         *
+         * @return The result of the background work, if any.
+         *
+         * @throws Exception an unhandled exception which occurred during the
+         *                   background operation
+         */
+        @Override
+        protected MultiValuedMap<String, List<String>> call() throws Exception {
+            MultiValuedMap<String, List<String>> breakout = new ArrayListValuedHashMap<>();
+            double progress = 0.0;
+            updateProgress(progress, 1.0);
+            double progressUpdate = 1.0 / data.keySet().size();
+            int headerSize = 6;
+            loopBreak:
+            for (String key : data.keySet()) {
+                if (isCancelled()) {
+                    break;
+                }
+                List<List<String>> contractTable = new ArrayList<>(data.get(key));
+                Map<String, Integer> grandTotal = new TreeMap<>();
+                for (List<String> row : contractTable) {
+                    if (isCancelled()) {
+                        break loopBreak;
+                    }
+                    String itemKey = row.get(21).trim();
+                    if (kits.containsKey(itemKey)) {
+                        Subassembly subassembly = kits.get(itemKey);
+                        List<String> row1 = new ArrayList<>();
+                        row1.add(key);
+                        row1.add("");
+                        row1.add(subassembly.getAssemblyKey());
+                        row1.add(subassembly.getName());
+                        row1.add(row.get(22));
+                        row1.add(row.get(22));
+                        breakout.put(key, row1);
+                        breakoutRecurse(breakout,
+                                        subassembly,
+                                        key,
+                                        (int) Double.parseDouble(row.get(22).substring(0, row.get(22).length() - 1)),
+                                        grandTotal
+                        );
+                    }
+                }
+                if (!grandTotal.isEmpty()) {
+                    List<String> row = new ArrayList<>();
+                    row.add(key);
+                    row.add("Totals");
+                    row.addAll(utils.createEmptyRow(headerSize - 2));
+                    breakout.put(key, row);
+                    for (String s : grandTotal.keySet()) {
+                        List<String> totalRow = new ArrayList<>();
+                        totalRow.add(key);
+                        totalRow.add(s);
+                        totalRow.add((double) grandTotal.get(s) + "#");
+                        totalRow.addAll(utils.createEmptyRow(headerSize - 3));
+                        breakout.put(key, totalRow);
+                    }
+                }
+                progress += progressUpdate;
+                updateProgress(progress, 1.0);
+                utils.sleep(1);
+            }
+            return breakout;
+        }
+
+        public void setData(MultiValuedMap<String, List<String>> data) {
+            this.data = data;
+        }
+
+        public void setKits(Map<String, Subassembly> kits) {
+            this.kits = kits;
         }
     }
 }

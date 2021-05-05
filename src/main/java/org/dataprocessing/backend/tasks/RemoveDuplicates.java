@@ -6,7 +6,7 @@ import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,8 +45,8 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
      * The constructor for this sub-task
      */
     public RemoveDuplicates() {
-        newTable = new LinkedList<>();
-        duplicatesList = new LinkedList<>();
+        newTable = new ArrayList<>();
+        duplicatesList = new ArrayList<>();
         findProgress = new SimpleDoubleProperty(0.0);
         removeProgress = new SimpleDoubleProperty(0.0);
     }
@@ -70,7 +70,7 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
      */
     private void findDuplicates() {
         double progress = 0.0;
-        List<List<String>> tempTable = new LinkedList<>(table);
+        List<List<String>> tempTable = new ArrayList<>(table);
         newTable.add(tempTable.get(0));
         tempTable.remove(0);
         double progressUpdate = 1.0 / tempTable.size();
@@ -80,13 +80,14 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
                 break;
             }
             List<String> row = tempTable.get(0);
-            List<List<String>> duplicates = new LinkedList<>();
-            String key = row.get(0);
+            List<List<String>> duplicates = new ArrayList<>();
+            String key = row.get(1);
             for (List<String> searchRow : tempTable) {
                 if (isCancelled()) {
                     break loopBreak;
                 }
-                if (searchRow.get(0).contains(key)) {
+                String searchName = searchRow.get(1);
+                if (searchName.equalsIgnoreCase(key)) {
                     duplicates.add(searchRow);
                     progress += progressUpdate;
                     findProgress.set(progress);
@@ -116,7 +117,7 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
                 updateTotalProgress();
                 continue;
             }
-            if (duplicates.get(1).get(0).contains("#")) {
+            if (duplicates.get(1).get(1).toLowerCase().contains("berry")) {
                 newTable.addAll(duplicates);
                 progress += progressUpdate;
                 removeProgress.set(progress);
@@ -128,7 +129,7 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
                 if (isCancelled()) {
                     break loopBreak;
                 }
-                List<List<String>> duplicatesNew = new LinkedList<>();
+                List<List<String>> duplicatesNew = new ArrayList<>();
                 String name = duplicates.get(0).get(1);
                 for (List<String> entry : duplicates) {
                     if (isCancelled()) {
@@ -154,19 +155,16 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
                         }
                     }
                 }
-                if (duplicatesNew.get(1).get(0).contains("#")) {
-                    newTable.addAll(duplicatesNew);
-                    continue;
-                }
                 if (duplicatesNew.size() == 2) {
                     if (duplicatesNew.get(0).get(0).contains("HD") || duplicatesNew.get(1).get(0).contains("HD")) {
                         newTable.addAll(duplicatesNew);
                     } else {
+                        newTable.add(duplicatesNew.get(0));/*
                         if (duplicatesNew.get(1).get(0).contains(duplicatesNew.get(0).get(0))) {
-                            newTable.add(duplicatesNew.get(0));
+
                         } else {
                             newTable.addAll(duplicatesNew);
-                        }
+                        }*/
                     }
                     continue;
                 }

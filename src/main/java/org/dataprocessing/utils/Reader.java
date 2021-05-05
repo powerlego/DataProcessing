@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +22,6 @@ public class Reader extends Utils {
 
 
     private static final Logger logger = LogManager.getLogger();
-    private static final Converters converters = Converters.getInstance();
 
     public Reader() {
 
@@ -30,7 +30,7 @@ public class Reader extends Utils {
     public List<List<String>> readCSV(File csv) {
         try {
             CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(csv), StandardCharsets.UTF_8));
-            return converters.convertTableArrayToTable(reader.readAll());
+            return Converters.convertTableArrayToTableString(reader.readAll());
         } catch (IOException e) {
             logger.fatal("Unable to read CSV.", e);
             System.exit(-1);
@@ -49,14 +49,14 @@ public class Reader extends Utils {
             return readSheet(wb, sheet);
         } catch (IOException e) {
             logger.fatal("Unable to create workbook.", e);
-            return new LinkedList<>();
+            return new ArrayList<>();
         }
     }
 
     private List<List<String>> readSheet(Workbook wb, Sheet sheet) {
         FormulaEvaluator fe = wb.getCreationHelper().createFormulaEvaluator();
         DataFormatter formatter = new DataFormatter();
-        List<List<String>> sheetConvert = new LinkedList<>();
+        List<List<String>> sheetConvert = new ArrayList<>();
         {
             int startRow = 0;
             if (sheet.getRow(1) == null) {
@@ -65,7 +65,7 @@ public class Reader extends Utils {
             int columnCount = sheet.getRow(0).getLastCellNum();
             for (int r = startRow, rn = sheet.getLastRowNum(); r <= rn; r++) {
                 Row row = sheet.getRow(r);
-                List<String> rowList = new LinkedList<>();
+                List<String> rowList = new ArrayList<>();
                 if (row == null) {
                     sheetConvert.add(createEmptyRow(columnCount));
                     continue;

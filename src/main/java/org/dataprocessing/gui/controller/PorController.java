@@ -224,7 +224,7 @@ public class PorController {
                 porCustomer.map(executor);
                 porItemMaster.map(executor);
                 porOpenAR.map(executor);
-                porOpenSales.map(executor);
+                porOpenSales.map(/*executor*/);
                 porOpenPO.map(executor);
                 ObservableList<String> styleList = progSpin.getStyleClass();
                 context.register("StyleClasses", styleList);

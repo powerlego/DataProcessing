@@ -15,15 +15,15 @@ public class SqlServer {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger    logger         = LogManager.getLogger();
     /**
      * The connection string for the database
      */
-    private static final String dbString = "jdbc:sqlserver://localhost;database=POR3";
+    private static final String    dbString       = "jdbc:sqlserver://localhost\\SQLEXPRESS;database=POR3";
     /**
      * The username to login into the server
      */
-    private static final String user = "dataprocessing";
+    private static final String    user           = "dataprocessing";
     /**
      * The password to login into the server
      */
@@ -106,6 +106,8 @@ public class SqlServer {
                 connectionString += "Product name: " + dm.getDatabaseProductName() + "\n";
                 connectionString += "Product version: " + dm.getDatabaseProductVersion();
                 logger.debug(connectionString);
+                logger.debug(connection.getClientInfo().toString());
+                logger.debug(connection.getTypeMap().toString());
                 closed = false;
                 return connection;
             } else {

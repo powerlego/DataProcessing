@@ -12,9 +12,9 @@ import org.dataprocessing.utils.Utils;
 
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
@@ -35,10 +35,11 @@ public class POROpenAR {
      * The instance of the FileUtils class
      */
     private static final FileUtils fileUtils = FileUtils.getInstance();
+    private final        Utils utils = Utils.getInstance();
     /**
      * The template mapping task
      */
-    private final MapTemplate mapTemplate;
+    private final        MapTemplate mapTemplate;
     /**
      * The server table convert task
      */
@@ -70,17 +71,17 @@ public class POROpenAR {
      * @param storeLocation The path to the directory to store the mapped data
      */
     public POROpenAR(Path storeLocation) {
-        tasks = new LinkedList<>();
+        tasks = new ArrayList<>();
         tableConvertTask = new ServerTableConvertTask(
                 "SELECT DISTINCT CustomerFile.NAME        as Customer_Name,\n" +
-                        "                Transactions.STAT        as Transaction_Status,\n" +
-                        "                Transactions.CNTR        as Transaction_Contract,\n" +
-                        "                Transactions.CLDT        as Transaction_Close_Date,\n" +
-                        "                Salesman_Cntr.Name       as Contract_Sales_Rep_Name,\n" +
-                        "                TransactionType.TypeName as Transaction_Type,\n" +
-                        "                Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
-                        "                Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
-                        "                CustomerFile.Terms,\n" +
+                "                Transactions.STAT        as Transaction_Status,\n" +
+                "                Transactions.CNTR        as Transaction_Contract,\n" +
+                "                Transactions.CLDT        as Transaction_Close_Date,\n" +
+                "                Salesman_Cntr.Name       as Contract_Sales_Rep_Name,\n" +
+                "                TransactionType.TypeName as Transaction_Type,\n" +
+                "                Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
+                "                Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
+                "                CustomerFile.Terms,\n" +
                         "                Transactions.STR\n" +
                         "FROM Transactions\n" +
                         "         LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
@@ -148,7 +149,7 @@ public class POROpenAR {
      */
     public void map(ExecutorService executorService) {
         tableConvertTask.setOnSucceeded(event -> {
-            mapTemplate.setData(tableConvertTask.getValue());
+            mapTemplate.setData(utils.convertToTableString(tableConvertTask.getValue()));
             executorService.submit(mapTemplate);
         });
         mapTemplate.setOnSucceeded(event -> {
@@ -225,7 +226,7 @@ public class POROpenAR {
             mapTable1 = mapperUtils.createMapTable(template);
             mapTable2 = mapperUtils.createMapTable(template);
             mapTable3 = mapperUtils.createMapTable(template);
-            tables = new LinkedList<>();
+            tables = new ArrayList<>();
         }
 
         /**
@@ -249,7 +250,7 @@ public class POROpenAR {
                     break;
                 }
                 List<String> row = data.get(i);
-                List<String> mapRow = new LinkedList<>();
+                List<String> mapRow = new ArrayList<>();
                 for (int j = 0; j < header.size(); j++) {
                     if (isCancelled()) {
                         break loopBreak;
@@ -330,6 +331,42 @@ public class POROpenAR {
 
                 utils.sleep(1);
             }
+            mapTable1.sort((o1, o2) -> {
+                               if (mapTable1.indexOf(o1) == 0) {
+                                   return -1;
+                               }
+                               else if (mapTable1.indexOf(o2) == 0) {
+                                   return 1;
+                               }
+                               else {
+                                   return o1.get(0).compareTo(o2.get(0));
+                               }
+                           }
+            );
+            mapTable2.sort((o1, o2) -> {
+                               if (mapTable2.indexOf(o1) == 0) {
+                                   return -1;
+                               }
+                               else if (mapTable2.indexOf(o2) == 0) {
+                                   return 1;
+                               }
+                               else {
+                                   return o1.get(0).compareTo(o2.get(0));
+                               }
+                           }
+            );
+            mapTable3.sort((o1, o2) -> {
+                               if (mapTable3.indexOf(o1) == 0) {
+                                   return -1;
+                               }
+                               else if (mapTable3.indexOf(o2) == 0) {
+                                   return 1;
+                               }
+                               else {
+                                   return o1.get(0).compareTo(o2.get(0));
+                               }
+                           }
+            );
             tables.add(mapTable1);
             tables.add(mapTable2);
             tables.add(mapTable3);

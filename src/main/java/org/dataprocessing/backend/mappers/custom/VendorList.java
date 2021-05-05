@@ -130,7 +130,7 @@ public class VendorList {
      */
     public void map(ExecutorService executorService) {
         tableConvertTask.setOnSucceeded(event -> {
-            mapTemplate.setData(tableConvertTask.getValue());
+            mapTemplate.setData(fileUtils.convertToTableString(tableConvertTask.getValue()));
             executorService.submit(mapTemplate);
         });
         mapTemplate.setOnSucceeded(event -> {

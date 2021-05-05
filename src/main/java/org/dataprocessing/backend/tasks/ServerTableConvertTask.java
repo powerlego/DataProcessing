@@ -9,7 +9,7 @@ import org.dataprocessing.utils.Utils;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,15 +17,16 @@ import java.util.List;
  *
  * @author Nicholas Curl
  */
-public class ServerTableConvertTask extends Task<List<List<String>>> {
+public class ServerTableConvertTask extends Task<List<List<?>>> {
+
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger    logger = LogManager.getLogger();
     /**
      * The instance of the Utils class
      */
-    private static final Utils utils = Utils.getInstance();
+    private static final Utils     utils  = Utils.getInstance();
     /**
      * The instance of the SqlServer class
      */
@@ -54,8 +55,8 @@ public class ServerTableConvertTask extends Task<List<List<String>>> {
      * @throws Exception Any exception that might occur when executing this task
      */
     @Override
-    protected List<List<String>> call() throws Exception {
-        List<List<String>> table = new LinkedList<>();
+    protected List<List<?>> call() throws Exception {
+        List<List<?>> table = new ArrayList<>();
         double localProgress = 0.0;
         updateProgress(localProgress, 1.0);
         if (utils.isBlankString(sql)) {
@@ -69,7 +70,7 @@ public class ServerTableConvertTask extends Task<List<List<String>>> {
                 breakPoint:
                 try {
                     ResultSetMetaData metaData = resultSet.getMetaData();
-                    List<String> header = new LinkedList<>();
+                    List<String> header = new ArrayList<>();
                     int colCount = metaData.getColumnCount();
 
                     for (int i = 1; i <= colCount; i++) {
@@ -87,15 +88,16 @@ public class ServerTableConvertTask extends Task<List<List<String>>> {
                             if (isCancelled()) {
                                 break breakPoint;
                             }
-                            LinkedList<String> row = new LinkedList<>();
+                            ArrayList<Object> row = new ArrayList<>();
                             for (int i = 1; i <= colCount; i++) {
                                 if (isCancelled()) {
                                     break breakPoint;
                                 }
-                                String cell = resultSet.getString(i);
-                                if (!utils.isBlankString(cell)) {
-                                    row.add(cell.trim());
-                                } else {
+                                Object cell = resultSet.getObject(i);
+                                if (cell != null) {
+                                    row.add(cell);
+                                }
+                                else {
                                     row.add("");
                                 }
                                 if (isCancelled()) {

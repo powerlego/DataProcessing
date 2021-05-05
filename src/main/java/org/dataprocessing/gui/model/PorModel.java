@@ -9,8 +9,8 @@ import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -63,7 +63,7 @@ public class PorModel {
     public PorModel() {
         progLabelText = new SimpleStringProperty();
         locked = new SimpleBooleanProperty();
-        tasks = new LinkedList<>();
+        tasks = new ArrayList<>();
         filePath = new SimpleStringProperty();
         canceled = false;
     }

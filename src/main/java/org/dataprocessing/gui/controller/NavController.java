@@ -116,8 +116,8 @@ public class NavController {
      * The constructor for this class
      */
     public NavController() {
-        fileFormats = new TreeMap<>();
-        companyNames = new TreeMap<>();
+        fileFormats = new HashMap<>();
+        companyNames = new HashMap<>();
         window = utils.getWindow();
         dataLocation = null;
         storageLocation = null;
@@ -164,7 +164,7 @@ public class NavController {
         JFXButton accept = new JFXButton("ACCEPT");
         accept.setDefaultButton(true);
         accept.getStyleClass().add("dialog-accept");
-        List<String> formats = new LinkedList<>();
+        List<String> formats = new ArrayList<>();
         accept.setOnAction(event -> {
             if (expense.isSelected()) formats.add("expense");
             if (ap.isSelected()) formats.add("ap");
@@ -475,7 +475,7 @@ public class NavController {
         JFXButton accept = new JFXButton("ACCEPT");
         accept.setDefaultButton(true);
         accept.getStyleClass().add("dialog-accept");
-        List<String> formats = new LinkedList<>();
+        List<String> formats = new ArrayList<>();
         accept.setOnAction(event -> {
             if (expense.isSelected()) formats.add("expense");
             if (ap.isSelected()) formats.add("ap");

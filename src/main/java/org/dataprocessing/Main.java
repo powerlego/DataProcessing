@@ -122,7 +122,6 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(event -> {
             thread.interrupt();
             server.closeConnection();
-            System.exit(0);
         });
         utils.setWindow(primaryStage);
         primaryStage.show();
