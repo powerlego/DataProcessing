@@ -51,6 +51,7 @@ public class RemoveNonAlphaNum extends Task<List<List<String>>> {
             progress += progressUpdate;
             updateProgress(progress, 1.0);
         }
+        updateProgress(1.0, 1.0);
         return table;
     }
 

@@ -202,4 +202,10 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
     public void setTable(List<List<String>> table) {
         this.table = table;
     }
+
+    @Override
+    protected void succeeded() {
+        super.succeeded();
+        updateProgress(1.0, 1.0);
+    }
 }

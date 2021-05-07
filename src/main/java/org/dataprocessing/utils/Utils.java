@@ -10,6 +10,8 @@ import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Nicholas Curl
@@ -31,11 +33,28 @@ public class Utils {
         for (List<?> objects : dataList) {
             List<String> row = new ArrayList<>();
             for (Object object : objects) {
-                row.add(object.toString().trim());
+                if (object == null) {
+                    row.add("");
+                }
+                else {
+                    row.add(object.toString().trim());
+                }
             }
             data.add(row);
         }
         return data;
+    }
+
+    public void shutdownExecutor(ExecutorService executorService, Logger logger) {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                logger.warn("Termination Timeout");
+            }
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**

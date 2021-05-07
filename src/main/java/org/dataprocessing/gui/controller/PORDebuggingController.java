@@ -25,6 +25,7 @@ import org.dataprocessing.backend.database.SqlServer;
 import org.dataprocessing.backend.mappers.por.POROpenSales;
 import org.dataprocessing.gui.model.PorModel;
 import org.dataprocessing.utils.Alerts;
+import org.dataprocessing.utils.CustomExecutors;
 import org.dataprocessing.utils.FileUtils;
 import org.dataprocessing.utils.Utils;
 
@@ -36,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -188,7 +188,7 @@ public class PORDebuggingController {
                 );
             }
             else {
-                ExecutorService executor = Executors.newCachedThreadPool();
+                ExecutorService executor = CustomExecutors.newFixedThreadPool(20);
                 server.connectToServer();
                 Path storeLocation = Paths.get(storageLocation.toURI());
                 Path porStoreLocation = storeLocation.resolve("POR/");
@@ -219,7 +219,7 @@ public class PORDebuggingController {
                 complete = Bindings.createBooleanBinding(() -> (Math.abs(1.0 - totalProgress.get()) <= 5e-5),
                                                          totalProgress
                 );
-                porOpenSales.map();
+                porOpenSales.map(executor);
                 ObservableList<String> styleList = progSpin.getStyleClass();
                 context.register("StyleClasses", styleList);
                 complete.addListener(new ChangeListener<Boolean>() {

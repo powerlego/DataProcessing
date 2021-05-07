@@ -18,22 +18,23 @@ import javafx.scene.layout.StackPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dataprocessing.backend.database.SqlServer;
-import org.dataprocessing.backend.mappers.custom.VendorList;
+import org.dataprocessing.backend.tasks.KitWriter;
+import org.dataprocessing.utils.CustomExecutors;
+import org.dataprocessing.utils.Utils;
 
 import javax.annotation.PostConstruct;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Nicholas Curl
  */
 @ViewController(value = "/fxml/debugging.fxml", title = "Data Processor")
 public class DebuggingController {
-    private static final Logger logger = LogManager.getLogger();
-    private static final SqlServer server = SqlServer.getInstance();
+    private static final Logger          logger = LogManager.getLogger();
+    private static final SqlServer       server = SqlServer.getInstance();
+    private static final Utils           utils  = Utils.getInstance();
     @FXMLViewFlowContext
-    private ViewFlowContext context;
+    private              ViewFlowContext context;
 
     @FXML
     private JFXSpinner progSpin;
@@ -56,27 +57,30 @@ public class DebuggingController {
             });
             progSpin.getStyleClass().setAll(styles);
         }
-        ExecutorService executor = Executors.newCachedThreadPool();
+        ExecutorService executor = CustomExecutors.newFixedThreadPool(20);
         process.setOnAction(action -> {
             progSpin.getStyleClass().remove("custom-spinner-success");
             progSpin.getStyleClass().remove("custom-spinner-cancel");
             server.connectToServer();
-
-            VendorList vendorList = new VendorList(Paths.get("./mapped data/"));
+            KitWriter kitWriter = new KitWriter();
+            //VendorList vendorList = new VendorList(Paths.get("./mapped data/"));
             DoubleBinding totalProgress = Bindings.createDoubleBinding(() -> (
-                            Math.max(0, vendorList.getTotalProgress())
-                    ),
-                    vendorList.totalProgressProperty()
+                                                                               Math.max(0, kitWriter.getTotalProgress())
+                                                                       ),
+                                                                       kitWriter.totalProgressProperty()
             );
             progSpin.progressProperty().bind(totalProgress);
-            complete = Bindings.createBooleanBinding(() -> (Math.abs(1.0 - totalProgress.get()) <= 5e-5), totalProgress);
-            vendorList.map(executor);
+            complete = Bindings.createBooleanBinding(() -> (Math.abs(1.0 - totalProgress.get()) <= 5e-5),
+                                                     totalProgress
+            );
+            kitWriter.map(executor);
             ObservableList<String> styleList = progSpin.getStyleClass();
             context.register("StyleClasses", styleList);
             complete.addListener(new ChangeListener<Boolean>() {
                 @Override
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                     if (newValue) {
+                        utils.shutdownExecutor(executor, logger);
                         progSpin.getStyleClass().add("custom-spinner-success");
                         complete.removeListener(this);
                     }

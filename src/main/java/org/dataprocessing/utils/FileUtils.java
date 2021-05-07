@@ -289,6 +289,9 @@ public class FileUtils extends Utils {
                 double progress = 0.0;
                 updateProgress(progress, 1.0);
                 for (String sheetName : sheets.keySet()) {
+                    if (isCancelled()) {
+                        break;
+                    }
                     XSSFSheet sheet = wb.createSheet(sheetName);
                     List<List<String>> table = sheets.get(sheetName);
                     CreationHelper creationHelper = wb.getCreationHelper();

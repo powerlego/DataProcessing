@@ -1,5 +1,6 @@
 package org.dataprocessing.backend.mappers.por;
 
+import com.google.common.collect.Iterables;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.concurrent.Task;
@@ -13,6 +14,7 @@ import org.dataprocessing.backend.objects.Subassembly.AssemblyItem;
 import org.dataprocessing.backend.tasks.KitMapper;
 import org.dataprocessing.backend.tasks.KitMapper.KitMapping;
 import org.dataprocessing.backend.tasks.ServerTableConvertTask;
+import org.dataprocessing.utils.CustomExecutors;
 import org.dataprocessing.utils.FileUtils;
 import org.dataprocessing.utils.FileUtils.XlsxTask;
 import org.dataprocessing.utils.FileUtils.XlsxTaskMultiSheet;
@@ -23,8 +25,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +80,7 @@ public class POROpenSales {
     private final        GroupSalesOrders       groupSalesOrders2;
     private final        FilterSubassemblies    filterSubassemblies2;
     private final        BreakoutSubassemblies  breakoutSubassemblies2;
+    private final        GroupSalesOrders       groupData;
     /**
      * The total progress of this task
      */
@@ -174,6 +176,7 @@ public class POROpenSales {
                 "         LEFT JOIN TransactionType on Transactions.TransactionType = TransactionType.TypeNumber\n" +
                 "         LEFT JOIN TaxTable on Transactions.TaxCode = TaxTable.TaxCode"
         );
+        groupData = new GroupSalesOrders();
         kitMapper = new KitMapper();
         kitMapping = (KitMapping) kitMapper.getTasks().get(1);
         writeTask1 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey Tent & Awning.xlsx"));
@@ -195,6 +198,7 @@ public class POROpenSales {
         filterSubassemblies2 = new FilterSubassemblies();
         breakoutSubassemblies2 = new BreakoutSubassemblies();
         tasks.add(tableConvertTask);
+        tasks.add(groupData);
         tasks.add(mapTemplate);
         tasks.addAll(kitMapper.getTasks());
         tasks.add(groupSalesOrders);
@@ -214,6 +218,7 @@ public class POROpenSales {
         tasks.add(writeTask6);
         totalProgress = Bindings.createDoubleBinding(() -> (
                                                                    Math.max(0, tableConvertTask.getProgress()) +
+                                                                   Math.max(0, groupData.getProgress()) +
                                                                    Math.max(0, mapTemplate.getProgress()) +
                                                                    Math.max(0, kitMapper.getTotalProgress()) +
                                                                    Math.max(0, groupSalesOrders.getProgress()) +
@@ -231,8 +236,9 @@ public class POROpenSales {
                                                                    Math.max(0, writeTask4.getProgress()) +
                                                                    Math.max(0, writeTask5.getProgress()) +
                                                                    Math.max(0, writeTask6.getProgress())
-                                                           ) / 11,
+                                                           ) / 19,
                                                      tableConvertTask.progressProperty(),
+                                                     groupData.progressProperty(),
                                                      mapTemplate.progressProperty(),
                                                      kitMapper.totalProgressProperty(),
                                                      groupSalesOrders.progressProperty(),
@@ -274,10 +280,24 @@ public class POROpenSales {
     /**
      * Maps the template
      */
-    public void map() {
-        ExecutorService executorService = Executors.newCachedThreadPool();
+    public void map(ExecutorService executorService) {
         kitMapping.setOnSucceeded(event -> {
-            mapTemplate.setData(tableConvertTask.getValue());
+            tableConvertTask.getValue().remove(0);
+            List<List<?>> dataTemp = tableConvertTask.getValue().parallelStream()
+                                                     .sorted(Comparator.comparing((List<?> o) -> (String) o.get(0))
+                                                                       .thenComparing((List<?> o) -> (BigDecimal) o.get(
+                                                                               7),
+                                                                                      Comparator.reverseOrder()
+                                                                       )
+                                                                       .thenComparing((List<?> o) -> (String) o.get(4)))
+                                                     .collect(Collectors.toList());
+            groupData.setHasHeader(false);
+            List<List<String>> dataTempString = utils.convertToTableString(dataTemp);
+            groupData.setData(dataTempString);
+            executorService.submit(groupData);
+        });
+        groupData.setOnSucceeded(event -> {
+            mapTemplate.setData(groupData.getValue());
             executorService.submit(mapTemplate);
         });
         mapTemplate.setOnSucceeded(event -> {
@@ -353,18 +373,7 @@ public class POROpenSales {
             writeTask6.setSheets(addBreakoutHeader(table, breakoutTable));
             executorService.submit(writeTask6);
         });
-        writeTask6.setOnSucceeded(event -> {
-            totalProgress.add(0.0001);
-            executorService.shutdown();
-            try {
-                if (!executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                    logger.warn("Termination Timeout");
-                }
-            }
-            catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
+        writeTask6.setOnSucceeded(event -> totalProgress.add(0.0001));
         writeTask1.setOnSucceeded(event -> executorService.submit(writeTask2));
         writeTask2.setOnSucceeded(event -> executorService.submit(writeTask3));
         executorService.submit(tableConvertTask);
@@ -405,53 +414,53 @@ public class POROpenSales {
         /**
          * The instance of the Utils class
          */
-        private static final Utils                    utils           = Utils.getInstance();
+        private static final Utils                                utils           = Utils.getInstance();
         /**
          * The instance of the MapperUtils class
          */
-        private static final MapperUtils              mapperUtils     = MapperUtils.getInstance();
+        private static final MapperUtils                          mapperUtils     = MapperUtils.getInstance();
         /**
          * The instance of SqlServer Class
          */
-        private static final SqlServer                server          = SqlServer.getInstance();
+        private static final SqlServer                            server          = SqlServer.getInstance();
         /**
          * The template associated with this mapping
          */
-        private static final String                   template
-                                                                      = "/templates/Open Sales Order Template_MFG FINAL.xlsx";
+        private static final String                               template
+                                                                                  = "/templates/Open Sales Order Template_MFG FINAL.xlsx";
         /**
          * The corrections file associated with this mapping
          */
-        private static final String                   correctionsFile = "./corrections/por.txt";
-        private static final Logger                   logger          = LogManager.getLogger();
+        private static final String                               correctionsFile = "./corrections/por.txt";
+        private static final Logger                               logger          = LogManager.getLogger();
         /**
          * The header of the template
          */
-        private final        List<String>             header;
+        private final        List<String>                         header;
         /**
          * The map containing the incorrect string and its correction
          */
-        private final        Map<String, String>      corrections;
+        private final        Map<String, String>                  corrections;
         /**
          * The table that stores the mapped data for store 1
          */
-        private final        List<List<String>>       mapTable1;
+        private final        List<List<String>>                   mapTable1;
         /**
          * The table that stores the mapped data for store 2
          */
-        private final        List<List<String>>       mapTable2;
+        private final        List<List<String>>                   mapTable2;
         /**
          * The table that stores the mapped data for store 3
          */
-        private final        List<List<String>>       mapTable3;
+        private final        List<List<String>>                   mapTable3;
         /**
          * The list of tables for every store listed in POR
          */
-        private final        List<List<List<String>>> tables;
+        private final        List<List<List<String>>>             tables;
         /**
          * Local copy of the data to map
          */
-        private              List<List<?>>            data;
+        private              MultiValuedMap<String, List<String>> data;
 
         /**
          * The constructor for this inner class
@@ -474,271 +483,296 @@ public class POROpenSales {
          */
         @Override
         protected List<List<List<String>>> call() throws Exception {
-            List<List<String>> mapTable1Temp = new ArrayList<>();
-            List<List<String>> mapTable2Temp = new ArrayList<>();
-            List<List<String>> mapTable3Temp = new ArrayList<>();
-            String[] split;
-            String dateString;
-            double progress = 0.0;
+            List<List<String>> mapTable1Temp = Collections.synchronizedList(new ArrayList<>());
+            List<List<String>> mapTable2Temp = Collections.synchronizedList(new ArrayList<>());
+            List<List<String>> mapTable3Temp = Collections.synchronizedList(new ArrayList<>());
+            AtomicReference<Double> progress = new AtomicReference<>(0.0);
             updateProgress(0, 1.0);
-            data.remove(0);
             double progressUpdate = 1.0 / data.size() / header.size();
-            List<List<?>> dataTemp = data.parallelStream()
-                                         .sorted(Comparator.comparing((List<?> o) -> (String) o.get(0))
-                                                           .thenComparing((List<?> o) -> (BigDecimal) o.get(7),
-                                                                          Comparator.reverseOrder()
-                                                           )
-                                                           .thenComparing((List<?> o) -> (String) o.get(4)))
-                                         .collect(Collectors.toList());
-            List<List<String>> dataTempString = utils.convertToTableString(dataTemp);
-            loopBreak:
-            for (int i = 0; i < dataTempString.size(); i++) {
-                if (isCancelled()) {
-                    break;
-                }
-                List<String> row = dataTempString.get(i);
-                List<String> mapRow = new ArrayList<>();
-                for (int j = 0; j < header.size(); j++) {
-                    if (isCancelled()) {
-                        break loopBreak;
-                    }
-                    switch (j) {
-                        case 0:
-                        case 1:
-                            mapRow.add(j, row.get(0).trim() + "@");
-                            break;
-                        case 2:
-                            mapRow.add(j, row.get(1).trim());
-                            break;
-                        case 3:
-                        case 5:
-                            mapRow.add(j, row.get(2).trim());
-                            break;
-                        case 4:
-                            if (row.get(33).trim().equalsIgnoreCase("1")) {
-                                mapRow.add(j, "Review Billing");
-                            }
-                            else {
-                                mapRow.add(j, "Open");
-                            }
-                            break;
-                        case 6:
-                            dateString = row.get(32).trim();
-                            if (dateString.contains("1899-12-30")) {
-                                mapRow.add(j, row.get(35).trim());
-                            }
-                            else {
-                                mapRow.add(j, dateString);
-                            }
-                            break;
-                        case 8:
-                            if (i != 0) {
-                                if (row.get(0).trim().equalsIgnoreCase(dataTempString.get(i - 1).get(0).trim())) {
-                                    mapRow.add(j, "");
+            ExecutorService service = CustomExecutors.newFixedThreadPool(20);
+            for (String s : data.keySet()) {
+                List<List<String>> list = new ArrayList<>(data.get(s));
+                Iterable<List<List<String>>> partition = Iterables.partition(list, 10);
+                ExecutorService executorService = CustomExecutors.newFixedThreadPool(20);
+                service.submit(() -> {
+                    for (List<List<String>> dataTempString : partition) {
+                        executorService.submit(() -> {
+                            String[] split;
+                            String dateString;
+                            loopBreak:
+                            for (int i = 0; i < dataTempString.size(); i++) {
+                                if (isCancelled()) {
+                                    break;
                                 }
-                                else {
-                                    mapRow.add(j, row.get(28).trim() + "^");
-                                }
-                            }
-                            else {
-                                mapRow.add(j, row.get(28).trim() + "^");
-                            }
-                            break;
-                        case 9:
-                            mapRow.add(j, row.get(3).trim());
-                            break;
-                        case 21:
-                            String itemKey = row.get(4).trim();
-                            mapRow.add(j, itemKey);
-                            break;
-                        case 22:
-                            mapRow.add(j, row.get(6).trim() + "#");
-                            break;
-                        case 25:
-                            try {
-                                double amount = Double.parseDouble(row.get(7).trim());
-                                if (amount == 0) {
-                                    mapRow.add(j, row.get(7).trim());
-                                }
-                                else {
-                                    double qty = Double.parseDouble(row.get(6).trim());
-                                    double result = amount / qty;
-                                    if (Double.isNaN(result) || Double.isInfinite(result)) {
-                                        logger.fatal("Divide by zero error");
-                                        System.exit(-1);
+                                List<String> row = dataTempString.get(i);
+                                String[] mapRow = new String[header.size()];
+                                //List<String> mapRow = new ArrayList<>();
+                                for (int j = 0; j < header.size(); j++) {
+                                    if (isCancelled()) {
+                                        break loopBreak;
                                     }
-                                    mapRow.add(j, utils.round(result, 2) + "$");
+                                    switch (j) {
+                                        case 0:
+                                        case 1:
+
+                                            mapRow[j] = row.get(0).trim() + "@";
+                                            break;
+                                        case 2:
+                                            mapRow[j] = row.get(1).trim();
+                                            break;
+                                        case 3:
+                                        case 5:
+                                            mapRow[j] = row.get(2).trim();
+                                            break;
+                                        case 4:
+                                            if (row.get(33).trim().equalsIgnoreCase("1")) {
+                                                mapRow[j] = "Review Billing";
+                                            }
+                                            else {
+                                                mapRow[j] = "Open";
+                                            }
+                                            break;
+                                        case 6:
+                                            dateString = row.get(32).trim();
+                                            if (dateString.contains("1899-12-30")) {
+                                                mapRow[j] = row.get(35).trim();
+                                            }
+                                            else {
+                                                mapRow[j] = dateString;
+                                            }
+                                            break;
+                                        case 8:
+                                            if (dataTempString.indexOf(row) == 0) {
+                                                mapRow[j] = row.get(28).trim() + "^";
+                                            }
+                                            else {
+                                                mapRow[j] = "";
+                                            }
+                                    /*if (i != 0) {
+                                        if (row.get(0)
+                                               .trim()
+                                               .equalsIgnoreCase(dataTempString.get(i - 1).get(0).trim())) {
+
+                                        }
+                                        else {
+
+                                        }
+                                    }
+                                    else {
+                                        mapRow[j] = row.get(28).trim() + "^";
+                                    }*/
+                                            break;
+                                        case 9:
+                                            mapRow[j] = row.get(3).trim();
+                                            break;
+                                        case 21:
+                                            String itemKey = row.get(4).trim();
+                                            mapRow[j] = itemKey;
+                                            break;
+                                        case 22:
+                                            mapRow[j] = row.get(6).trim() + "#";
+                                            break;
+                                        case 25:
+                                            try {
+                                                double amount = Double.parseDouble(row.get(7).trim());
+                                                if (amount == 0) {
+                                                    mapRow[j] = row.get(7).trim();
+                                                }
+                                                else {
+                                                    double qty = Double.parseDouble(row.get(6).trim());
+                                                    double result = amount / qty;
+                                                    if (Double.isNaN(result) || Double.isInfinite(result)) {
+                                                        logger.fatal("Divide by zero error");
+                                                        System.exit(-1);
+                                                    }
+                                                    mapRow[j] = utils.round(result, 2) + "$";
+                                                }
+                                            }
+                                            catch (NumberFormatException ignored) {
+                                            }
+                                            break;
+                                        case 26:
+                                            mapRow[j] = row.get(7).trim();
+                                            break;
+                                        case 27:
+                                            mapRow[j] = row.get(5).trim();
+                                            break;
+                                        case 28:
+                                        case 62:
+                                            mapRow[j] = "TRUE";
+                                            break;
+                                        case 30:
+                                            mapRow[j] = row.get(8).trim();
+                                            break;
+                                        case 32:
+                                            String currentStore = row.get(9).trim();
+                                            if (currentStore.equalsIgnoreCase("003")) {
+                                                mapRow[j] = "Houston Depot";
+                                            }
+                                            else {
+                                                mapRow[j] = "Memphis";
+                                            }
+                                            break;
+                                        case 36:
+                                            dateString = row.get(10).trim();
+                                            if (dateString.contains("1899-12-30")) {
+                                                mapRow[j] = row.get(2).trim();
+                                            }
+                                            else {
+                                                mapRow[j] = dateString;
+                                            }
+                                            break;
+                                        case 41:
+                                            mapRow[j] = row.get(14).trim();
+                                            break;
+                                        case 43:
+                                            split = row.get(11).trim().split(", ");
+                                            mapRow[j] = split[0];
+                                            try {
+                                                mapRow[j + 1] = split[1];
+                                            }
+                                            catch (IndexOutOfBoundsException e) {
+                                                mapRow[j + 1] = "";
+                                            }
+                                            break;
+                                        case 45:
+                                            split = row.get(12).trim().split(", ");
+                                            mapRow[j] = split[0];
+                                            try {
+                                                mapRow[j + 1] = split[1];
+                                            }
+                                            catch (IndexOutOfBoundsException e) {
+                                                mapRow[j + 1] = "";
+                                            }
+                                            break;
+                                        case 44:
+                                        case 46:
+                                        case 56:
+                                            break;
+                                        case 47:
+                                            mapRow[j] = row.get(13).trim();
+                                            break;
+                                        case 49:
+                                            mapRow[j] = row.get(15).trim();
+                                            break;
+                                        case 50:
+                                            mapRow[j] = row.get(16).trim();
+                                            break;
+                                        case 51:
+                                            mapRow[j] = row.get(17).trim();
+                                            break;
+                                        case 53:
+                                            mapRow[j] = row.get(19).trim();
+                                            break;
+                                        case 54:
+                                            mapRow[j] = row.get(20).trim();
+                                            break;
+                                        case 55:
+                                            //Checks to see if the city and state is blank
+                                            if (utils.isBlankString(row.get(21))) {
+                                                mapRow[j] = "";
+                                                mapRow[j + 1] = "";
+                                            }
+                                            //Checks to see if the city and state has a correction
+                                            else if (corrections.containsKey(row.get(21).trim())) {
+                                                split = corrections.get(row.get(21).trim()).split(",");
+                                                mapRow[j] = split[0].trim();
+                                                mapRow[j + 1] = split[1].trim();
+                                            }
+                                            else {
+                                                split = row.get(21).split(",");
+                                                mapRow[j] = split[0].trim();
+                                                try {
+                                                    mapRow[j + 1] = split[1].trim();
+                                                }
+                                                catch (ArrayIndexOutOfBoundsException e) {
+                                                    logger.fatal("Array out of bound for string {}", row.get(21), e);
+                                                    System.exit(1);
+                                                }
+                                            }
+                                            break;
+                                        case 57:
+                                            if (utils.isBlankString(row.get(23))) {
+                                                mapRow[j] = row.get(22);
+                                            }
+                                            else if (utils.isBlankString(row.get(22)) &&
+                                                     utils.isBlankString(row.get(23))) {
+                                                mapRow[j] = "";
+                                            }
+                                            else {
+                                                mapRow[j] = row.get(22) + "-" + row.get(23);
+                                            }
+                                            break;
+                                        case 48:
+                                        case 58:
+                                        case 60:
+                                            mapRow[j] = "USA";
+                                            break;
+                                        case 59:
+                                            mapRow[j] = row.get(18).trim();
+                                            break;
+                                        case 61:
+                                            mapRow[j] = "1#";
+                                            break;
+                                        case 63:
+                                            String taxState = row.get(26).trim().substring(0, 2);
+                                            mapRow[j] = taxState;
+                                            break;
+                                        case 64:
+                                            mapRow[j] = row.get(34).trim() + "%";
+                                            break;
+                                        case 65:
+                                        case 66:
+                                        case 68:
+                                            mapRow[j] = "FALSE";
+                                            break;
+                                        case 67:
+                                            mapRow[j] = row.get(24).trim();
+                                            break;
+                                        case 69:
+                                            mapRow[j] = row.get(25).trim();
+                                            break;
+                                        case 72:
+                                            mapRow[j] = row.get(27).trim() + "@";
+                                            break;
+                                        case 73:
+                                            mapRow[j] = row.get(29).trim() + "@";
+                                            break;
+                                        case 74:
+                                            mapRow[j] = row.get(30).trim();
+                                            break;
+                                        case 75:
+                                            mapRow[j] = row.get(31).trim() + "^";
+                                            break;
+                                        default:
+                                            mapRow[j] = "";
+                                            break;
+                                    }
+                                    progress.updateAndGet(v -> v + progressUpdate);
+                                    updateProgress(progress.get(), 1.0);
                                 }
+                                switch (row.get(36).trim()) {
+                                    case "001":
+                                        mapTable1Temp.add(new ArrayList<>(Arrays.asList(mapRow)));
+                                        break;
+                                    case "002":
+                                        mapTable2Temp.add(new ArrayList<>(Arrays.asList(mapRow)));
+                                        break;
+                                    case "003":
+                                        mapTable3Temp.add(new ArrayList<>(Arrays.asList(mapRow)));
+                                        break;
+                                }
+                                utils.sleep(1);
                             }
-                            catch (NumberFormatException ignored) {
-                            }
-                            break;
-                        case 26:
-                            mapRow.add(j, row.get(7).trim());
-                            break;
-                        case 27:
-                            mapRow.add(j, row.get(5).trim());
-                            break;
-                        case 28:
-                        case 62:
-                            mapRow.add(j, "TRUE");
-                            break;
-                        case 30:
-                            mapRow.add(j, row.get(8).trim());
-                            break;
-                        case 32:
-                            String currentStore = row.get(9).trim();
-                            if (currentStore.equalsIgnoreCase("003")) {
-                                mapRow.add(j, "Houston Depot");
-                            }
-                            else {
-                                mapRow.add(j, "Memphis");
-                            }
-                            break;
-                        case 36:
-                            dateString = row.get(10).trim();
-                            if (dateString.contains("1899-12-30")) {
-                                mapRow.add(j, row.get(2).trim());
-                            }
-                            else {
-                                mapRow.add(j, dateString);
-                            }
-                            break;
-                        case 41:
-                            mapRow.add(j, row.get(14).trim());
-                            break;
-                        case 43:
-                            split = row.get(11).trim().split(", ");
-                            mapRow.add(j, split[0]);
-                            try {
-                                mapRow.add(j + 1, split[1]);
-                            }
-                            catch (IndexOutOfBoundsException e) {
-                                mapRow.add(j + 1, "");
-                            }
-                            break;
-                        case 45:
-                            split = row.get(12).trim().split(", ");
-                            mapRow.add(j, split[0]);
-                            try {
-                                mapRow.add(j + 1, split[1]);
-                            }
-                            catch (IndexOutOfBoundsException e) {
-                                mapRow.add(j + 1, "");
-                            }
-                            break;
-                        case 44:
-                        case 46:
-                        case 56:
-                            break;
-                        case 47:
-                            mapRow.add(j, row.get(13).trim());
-                            break;
-                        case 49:
-                            mapRow.add(j, row.get(15).trim());
-                            break;
-                        case 50:
-                            mapRow.add(j, row.get(16).trim());
-                            break;
-                        case 51:
-                            mapRow.add(j, row.get(17).trim());
-                            break;
-                        case 53:
-                            mapRow.add(j, row.get(19).trim());
-                            break;
-                        case 54:
-                            mapRow.add(j, row.get(20).trim());
-                            break;
-                        case 55:
-                            //Checks to see if the city and state is blank
-                            if (utils.isBlankString(row.get(21))) {
-                                mapRow.add(j, "");
-                                mapRow.add(j + 1, "");
-                            }
-                            //Checks to see if the city and state has a correction
-                            else if (corrections.containsKey(row.get(21).trim())) {
-                                split = corrections.get(row.get(21).trim()).split(",");
-                                mapRow.add(j, split[0].trim());
-                                mapRow.add(j + 1, split[1].trim());
-                            }
-                            else {
-                                split = row.get(21).split(",");
-                                mapRow.add(j, split[0].trim());
-                                mapRow.add(j + 1, split[1].trim());
-                            }
-                            break;
-                        case 57:
-                            if (utils.isBlankString(row.get(23))) {
-                                mapRow.add(j, row.get(22));
-                            }
-                            else if (utils.isBlankString(row.get(22)) && utils.isBlankString(row.get(23))) {
-                                mapRow.add(j, "");
-                            }
-                            else {
-                                mapRow.add(j, row.get(22) + "-" + row.get(23));
-                            }
-                            break;
-                        case 48:
-                        case 58:
-                        case 60:
-                            mapRow.add(j, "USA");
-                            break;
-                        case 59:
-                            mapRow.add(j, row.get(18).trim());
-                            break;
-                        case 61:
-                            mapRow.add(j, "1#");
-                            break;
-                        case 63:
-                            String taxState = row.get(26).trim().substring(0, 2);
-                            mapRow.add(j, taxState);
-                            break;
-                        case 64:
-                            mapRow.add(j, row.get(34).trim() + "%");
-                            break;
-                        case 65:
-                        case 66:
-                        case 68:
-                            mapRow.add(j, "FALSE");
-                            break;
-                        case 67:
-                            mapRow.add(j, row.get(24).trim());
-                            break;
-                        case 69:
-                            mapRow.add(j, row.get(25).trim());
-                            break;
-                        case 72:
-                            mapRow.add(j, row.get(27).trim() + "@");
-                            break;
-                        case 73:
-                            mapRow.add(j, row.get(29).trim() + "@");
-                            break;
-                        case 74:
-                            mapRow.add(j, row.get(30).trim());
-                            break;
-                        case 75:
-                            mapRow.add(j, row.get(31).trim() + "^");
-                            break;
-                        default:
-                            mapRow.add(j, "");
-                            break;
+
+                            return null;
+                        });
                     }
-                    progress += progressUpdate;
-                    updateProgress(progress, 1.0);
-                }
-                switch (row.get(36).trim()) {
-                    case "001":
-                        mapTable1Temp.add(mapRow);
-                        break;
-                    case "002":
-                        mapTable2Temp.add(mapRow);
-                        break;
-                    case "003":
-                        mapTable3Temp.add(mapRow);
-                        break;
-                }
-                utils.sleep(1);
+                    utils.shutdownExecutor(executorService, logger);
+                    return null;
+                });
             }
+            utils.shutdownExecutor(service, logger);
             mapTable1.addAll(utils.parallelSortListAscending(mapTable1Temp, 0));
             mapTable2.addAll(utils.parallelSortListAscending(mapTable2Temp, 0));
             mapTable3.addAll(utils.parallelSortListAscending(mapTable3Temp, 0));
@@ -766,8 +800,8 @@ public class POROpenSales {
          *
          * @param data The data to map
          */
-        public void setData(List<List<?>> data) {
-            this.data = data;
+        public void setData(MultiValuedMap<String, List<String>> data) {
+            this.data = new ArrayListValuedHashMap<>(data);
         }
     }
 
@@ -775,7 +809,7 @@ public class POROpenSales {
     private static class GroupSalesOrders extends Task<MultiValuedMap<String, List<String>>> {
 
         private List<List<String>> data;
-
+        private boolean            hasHeader = true;
         /**
          * Invoked when the Task is executed, the call method must be overridden and
          * implemented by subclasses. The call method actually performs the
@@ -791,16 +825,16 @@ public class POROpenSales {
          */
         @Override
         protected MultiValuedMap<String, List<String>> call() throws Exception {
-            MultiValuedMap<String, List<String>> groupedMap = new ArrayListValuedHashMap<>();
+            final MultiValuedMap<String, List<String>> groupedMap = new ArrayListValuedHashMap<>();
             double progress = 0.0;
             updateProgress(progress, 1.0);
+            if (hasHeader) {
+                data.remove(0);
+            }
             double progressUpdate = 1.0 / data.size();
             for (List<String> list : data) {
-                if (data.indexOf(list) == 0) {
-                    progress += progressUpdate;
-                    updateProgress(progress, 1.0);
-                    utils.sleep(1);
-                    continue;
+                if (isCancelled()) {
+                    break;
                 }
                 groupedMap.put(list.get(0), list);
                 progress += progressUpdate;
@@ -811,7 +845,11 @@ public class POROpenSales {
         }
 
         public void setData(List<List<String>> data) {
-            this.data = data;
+            this.data = new ArrayList<>(data);
+        }
+
+        public void setHasHeader(boolean hasHeader) {
+            this.hasHeader = hasHeader;
         }
     }
 
@@ -902,11 +940,11 @@ public class POROpenSales {
         }
 
         public void setData(MultiValuedMap<String, List<String>> data) {
-            this.data = data;
+            this.data = new ArrayListValuedHashMap<>(data);
         }
 
         public void setKits(Map<String, Subassembly> kits) {
-            this.kits = kits;
+            this.kits = new HashMap<>(kits);
         }
     }
 
@@ -919,8 +957,8 @@ public class POROpenSales {
         private void breakoutRecurse(MultiValuedMap<String, List<String>> breakoutList,
                                      Subassembly subassembly,
                                      String contractNum,
-                                     int qty,
-                                     Map<String, Integer> grandTotal
+                                     double qty,
+                                     Map<String, Double> grandTotal
         ) {
             for (AssemblyItem assemblyItem : subassembly.getAssemblyItems()) {
                 if (isCancelled()) {
@@ -931,8 +969,8 @@ public class POROpenSales {
                 row.add(subassembly.getAssemblyKey());
                 row.add(assemblyItem.getItemKey());
                 row.add(assemblyItem.getName());
-                row.add((double) assemblyItem.getQty() + "#");
-                row.add((double) (assemblyItem.getQty() * qty) + "#");
+                row.add(assemblyItem.getQty() + "#");
+                row.add((assemblyItem.getQty() * qty) + "#");
                 breakoutList.put(contractNum, row);
                 if (assemblyItem.isSubassembly()) {
                     Subassembly subassembly1 = kits.get(assemblyItem.getItemKey());
@@ -940,7 +978,7 @@ public class POROpenSales {
                 }
                 else {
                     if (grandTotal.containsKey(assemblyItem.getItemKey())) {
-                        int total = grandTotal.get(assemblyItem.getItemKey());
+                        double total = grandTotal.get(assemblyItem.getItemKey());
                         total += (qty * assemblyItem.getQty());
                         grandTotal.put(assemblyItem.getItemKey(), total);
                     }
@@ -977,7 +1015,7 @@ public class POROpenSales {
                     break;
                 }
                 List<List<String>> contractTable = new ArrayList<>(data.get(key));
-                Map<String, Integer> grandTotal = new TreeMap<>();
+                Map<String, Double> grandTotal = new TreeMap<>();
                 for (List<String> row : contractTable) {
                     if (isCancelled()) {
                         break loopBreak;
@@ -996,7 +1034,7 @@ public class POROpenSales {
                         breakoutRecurse(breakout,
                                         subassembly,
                                         key,
-                                        (int) Double.parseDouble(row.get(22).substring(0, row.get(22).length() - 1)),
+                                        Double.parseDouble(row.get(22).substring(0, row.get(22).length() - 1)),
                                         grandTotal
                         );
                     }
@@ -1011,7 +1049,7 @@ public class POROpenSales {
                         List<String> totalRow = new ArrayList<>();
                         totalRow.add(key);
                         totalRow.add(s);
-                        totalRow.add((double) grandTotal.get(s) + "#");
+                        totalRow.add(grandTotal.get(s) + "#");
                         totalRow.addAll(utils.createEmptyRow(headerSize - 3));
                         breakout.put(key, totalRow);
                     }
@@ -1024,11 +1062,11 @@ public class POROpenSales {
         }
 
         public void setData(MultiValuedMap<String, List<String>> data) {
-            this.data = data;
+            this.data = new ArrayListValuedHashMap<>(data);
         }
 
         public void setKits(Map<String, Subassembly> kits) {
-            this.kits = kits;
+            this.kits = new HashMap<>(kits);
         }
     }
 }

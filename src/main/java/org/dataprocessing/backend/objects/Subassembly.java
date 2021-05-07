@@ -20,6 +20,7 @@ public class Subassembly {
     private static final Logger             logger = LogManager.getLogger(Subassembly.class);
     private final        String             assemblyKey;
     private final        String             name;
+    private              boolean            isChildSubassembly;
     private              List<AssemblyItem> assemblyItems;
 
 
@@ -27,6 +28,7 @@ public class Subassembly {
         this.assemblyKey = assemblyKey;
         this.name = name;
         this.assemblyItems = new ArrayList<>();
+        this.isChildSubassembly = false;
         assemblyItems.addAll(Arrays.asList(items));
     }
 
@@ -36,7 +38,7 @@ public class Subassembly {
         this.assemblyItems = items;
     }
 
-    public void addItem(AssemblyItem item) {
+    public synchronized void addItem(AssemblyItem item) {
         this.assemblyItems.add(item);
     }
 
@@ -72,12 +74,20 @@ public class Subassembly {
         return getAssemblyKey().equals(that.getAssemblyKey()) && getAssemblyItems().equals(that.getAssemblyItems());
     }
 
+    public List<AssemblyItem> getAssemblyItems() {
+        return assemblyItems;
+    }
+
     public String getAssemblyKey() {
         return assemblyKey;
     }
 
-    public List<AssemblyItem> getAssemblyItems() {
-        return assemblyItems;
+    public boolean isChildSubassembly() {
+        return isChildSubassembly;
+    }
+
+    public void setChildSubassembly(boolean childSubassembly) {
+        isChildSubassembly = childSubassembly;
     }
 
     @Override
@@ -85,6 +95,7 @@ public class Subassembly {
         return "Subassembly{" +
                "assemblyKey='" + assemblyKey + '\'' +
                ", name='" + name + '\'' +
+               ", isChildSubassembly=" + isChildSubassembly +
                ", assemblyItems=" + assemblyItems +
                '}';
     }
@@ -99,11 +110,11 @@ public class Subassembly {
 
         private final String  itemKey;
         private final String  name;
-        private final int     qty;
+        private final double  qty;
         private final boolean subassembly;
 
 
-        public AssemblyItem(String itemKey, int qty, String name, boolean subassembly) {
+        public AssemblyItem(String itemKey, double qty, String name, boolean subassembly) {
             this.itemKey = itemKey;
             this.qty = qty;
             this.name = name;
@@ -118,7 +129,7 @@ public class Subassembly {
             return name;
         }
 
-        public int getQty() {
+        public double getQty() {
             return qty;
         }
 

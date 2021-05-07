@@ -1,16 +1,26 @@
 package org.dataprocessing.backend.tasks;
 
+import com.google.common.collect.Iterables;
+import com.sun.rowset.internal.Row;
 import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dataprocessing.backend.database.SqlServer;
+import org.dataprocessing.utils.CustomThreadPoolExecutor;
 import org.dataprocessing.utils.Utils;
 
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Converts a SQL query table into a List&lt;List&lt;String&gt;&gt; Table
@@ -34,7 +44,7 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
     /**
      * The string containing the SQL Query
      */
-    private final String sql;
+    private final        String    sql;
 
     /**
      * The constructor for this class
@@ -56,9 +66,9 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
      */
     @Override
     protected List<List<?>> call() throws Exception {
-        List<List<?>> table = new ArrayList<>();
-        double localProgress = 0.0;
-        updateProgress(localProgress, 1.0);
+        List<List<?>> table = Collections.synchronizedList(new ArrayList<>());
+        AtomicReference<Double> localProgress = new AtomicReference<>(0.0);
+        updateProgress(localProgress.get(), 1.0);
         if (utils.isBlankString(sql)) {
             updateProgress(1.0, 1.0);
             return table;
@@ -66,60 +76,64 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
         if (!isCancelled()) {
             if (!server.isClosed()) {
                 ResultSet resultSet = server.queryServer(sql);
-                double localProgressUpdate = server.getLocalProgressUpdate(sql);
-                breakPoint:
-                try {
-                    ResultSetMetaData metaData = resultSet.getMetaData();
-                    List<String> header = new ArrayList<>();
-                    int colCount = metaData.getColumnCount();
-
-                    for (int i = 1; i <= colCount; i++) {
-                        if (isCancelled()) {
-                            break breakPoint;
-                        }
-                        header.add(metaData.getColumnName(i));
-                        localProgress += localProgressUpdate;
-                        updateProgress(localProgress, 1.0);
-                        utils.sleep(1);
+                RowSetFactory factory = RowSetProvider.newFactory();
+                CachedRowSet rowSet = factory.createCachedRowSet();
+                rowSet.populate(resultSet);
+                List<?> list = new ArrayList<>(rowSet.toCollection());
+                double localProgressUpdate = 1.0 / rowSet.size();
+                ResultSetMetaData metaData = rowSet.getMetaData();
+                List<String> header = new ArrayList<>();
+                int colCount = metaData.getColumnCount();
+                for (int i = 1; i <= colCount; i++) {
+                    if (isCancelled()) {
+                        break;
                     }
-                    if (!isCancelled()) {
-                        table.add(header);
-                        while (resultSet.next()) {
+                    header.add(metaData.getColumnName(i));
+                    utils.sleep(1);
+                }
+                localProgress.updateAndGet(v -> v + localProgressUpdate);
+                updateProgress(localProgress.get(), 1.0);
+                table.add(header);
+                Iterable<? extends List<?>> partition = Iterables.partition(list, 10);
+                CustomThreadPoolExecutor threadPoolExecutor = new CustomThreadPoolExecutor(20,
+                                                                                           20,
+                                                                                           0L,
+                                                                                           TimeUnit.MILLISECONDS,
+                                                                                           new LinkedBlockingQueue<>()
+                );
+                for (List<?> objects : partition) {
+                    if (isCancelled()) {
+                        break;
+                    }
+                    threadPoolExecutor.submit(() -> {
+                        for (Object object : objects) {
                             if (isCancelled()) {
-                                break breakPoint;
+                                break;
                             }
-                            ArrayList<Object> row = new ArrayList<>();
-                            for (int i = 1; i <= colCount; i++) {
-                                if (isCancelled()) {
-                                    break breakPoint;
-                                }
-                                Object cell = resultSet.getObject(i);
-                                if (cell != null) {
-                                    row.add(cell);
-                                }
-                                else {
-                                    row.add("");
-                                }
-                                if (isCancelled()) {
-                                    break breakPoint;
-                                }
-                                localProgress += localProgressUpdate;
-                                updateProgress(localProgress, 1.0);
+                            if (object instanceof Row) {
+                                Row row = (Row) object;
+                                ArrayList<Object> listRow = new ArrayList<>(Arrays.asList(row.getOrigRow()));
+                                table.add(listRow);
                             }
-                            if (isCancelled()) {
-                                break breakPoint;
-                            }
-                            table.add(row);
+                            localProgress.updateAndGet(v -> v + localProgressUpdate);
+                            updateProgress(localProgress.get(), 1.0);
                             utils.sleep(1);
                         }
+                        return null;
+                    });
+                }
+                threadPoolExecutor.shutdown();
+                try {
+                    if (!threadPoolExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                        logger.warn("Termination Timeout");
                     }
-                } catch (SQLException e) {
-                    logger.fatal("Unable to convert server table.", e);
-                    System.exit(-1);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }
-        return table;
+        return new ArrayList<>(table);
     }
 
     /**
@@ -129,5 +143,11 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
     protected void failed() {
         logger.fatal("Conversion Task failed", getException());
         System.exit(-1);
+    }
+
+    @Override
+    protected void succeeded() {
+        super.succeeded();
+        updateProgress(1.0, 1.0);
     }
 }

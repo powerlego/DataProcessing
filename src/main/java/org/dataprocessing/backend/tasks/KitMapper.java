@@ -1,5 +1,6 @@
 package org.dataprocessing.backend.tasks;
 
+import com.google.common.collect.Iterables;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.concurrent.Task;
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.dataprocessing.backend.database.SqlServer;
 import org.dataprocessing.backend.objects.Subassembly;
 import org.dataprocessing.backend.objects.Subassembly.AssemblyItem;
+import org.dataprocessing.utils.CustomThreadPoolExecutor;
 import org.dataprocessing.utils.Utils;
 
 import java.sql.ResultSet;
@@ -16,7 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Nicholas Curl
@@ -119,8 +125,8 @@ public class KitMapper {
          */
         @Override
         protected Map<String, Subassembly> call() throws Exception {
-            Map<String, Subassembly> subassemblies = new HashMap<>();
-            double progress = 0.0;
+            Map<String, Subassembly> subassemblies = new ConcurrentHashMap<>();
+            AtomicReference<Double> progress = new AtomicReference<>(0.0);
             updateProgress(0, 1.0);
             ResultSet resultSet = server.queryServer("Select count(*)\n" +
                                                      "from (select distinct ItemKitsAuto.Num\n" +
@@ -132,46 +138,81 @@ public class KitMapper {
             resultSet.next();
             int kitCount = resultSet.getInt(1);
             double progressUpdate = 1.0 / (data.size() + kitCount);
-            for (List<String> row : data) {
-                if (data.indexOf(row) == 0) {
-                    continue;
+            CustomThreadPoolExecutor threadPoolExecutor = new CustomThreadPoolExecutor(20,
+                                                                                       20,
+                                                                                       0L,
+                                                                                       TimeUnit.MILLISECONDS,
+                                                                                       new LinkedBlockingQueue<>()
+            );
+            data.remove(0);
+            Iterable<List<List<String>>> partition = Iterables.partition(data, 10);
+            for (List<List<String>> lists : partition) {
+                threadPoolExecutor.submit(() -> {
+                    for (List<String> row : lists) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        String assemblyKey = row.get(0);
+                        double qty = 0;
+                        try {
+                            qty = Double.parseDouble(row.get(3));
+                        }
+                        catch (NumberFormatException ignored) {
+                        }
+                        AssemblyItem item = new AssemblyItem(row.get(4),
+                                                             qty,
+                                                             !Strings.isBlank(row.get(5)) ? row.get(5) : "",
+                                                             (row.get(4).toLowerCase().contains(":") ||
+                                                              row.get(4).toLowerCase().contains("kit")
+                                                             )
+                        );
+                        if (subassemblies.containsKey(assemblyKey)) {
+                            Subassembly subassembly = subassemblies.get(assemblyKey);
+                            subassembly.addItem(item);
+                        }
+                        else {
+                            Subassembly subassembly = new Subassembly(assemblyKey, row.get(1), item);
+                            subassemblies.put(assemblyKey, subassembly);
+                        }
+                        progress.updateAndGet(v -> v + progressUpdate);
+                        updateProgress(progress.get(), 1.0);
+                        utils.sleep(1);
+                    }
+                });
+            }
+            threadPoolExecutor.shutdown();
+            try {
+                if (!threadPoolExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                    logger.warn("Termination Timeout");
                 }
-                if (isCancelled()) {
-                    break;
-                }
-                String assemblyKey = row.get(0);
-                int qty = 0;
-                try {
-                    qty = (int) Double.parseDouble(row.get(3));
-                }
-                catch (NumberFormatException ignored) {
-                }
-                AssemblyItem item = new AssemblyItem(row.get(4),
-                                                     qty,
-                                                     !Strings.isBlank(row.get(5)) ? row.get(5) : "",
-                                                     (row.get(4).toLowerCase().contains(":") ||
-                                                      row.get(4).toLowerCase().contains("kit")
-                                                     )
-                );
-                if (subassemblies.containsKey(assemblyKey)) {
-                    Subassembly subassembly = subassemblies.get(assemblyKey);
-                    subassembly.addItem(item);
-                }
-                else {
-                    Subassembly subassembly = new Subassembly(assemblyKey, row.get(1), item);
-                    subassemblies.put(assemblyKey, subassembly);
-                }
-                progress += progressUpdate;
-                updateProgress(progress, 1.0);
-                utils.sleep(1);
+            }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             for (Subassembly subassembly : subassemblies.values()) {
                 subassembly.sortAssemblyItems();
-                progress += progressUpdate;
-                updateProgress(progress, 1.0);
+                checkChildren(subassemblies, subassembly);
+                progress.updateAndGet(v -> v + progressUpdate);
+                updateProgress(progress.get(), 1.0);
                 utils.sleep(1);
             }
-            return subassemblies;
+            updateProgress(1.0, 1.0);
+            return new HashMap<>(subassemblies);
+        }
+
+        private void checkChildren(Map<String, Subassembly> subassemblies, Subassembly subassembly) {
+            for (AssemblyItem assemblyItem : subassembly.getAssemblyItems()) {
+                if (subassemblies.containsKey(assemblyItem.getItemKey()) && assemblyItem.isSubassembly()) {
+                    Subassembly childAssembly = subassemblies.get(assemblyItem.getItemKey());
+                    childAssembly.setChildSubassembly(true);
+                }
+            }
+        }
+
+        @Override
+        protected void succeeded() {
+            super.succeeded();
+            updateProgress(1.0, 1.0);
         }
 
         /**
