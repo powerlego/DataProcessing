@@ -6,7 +6,7 @@ import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dataprocessing.backend.database.SqlServer;
-import org.dataprocessing.utils.CustomThreadPoolExecutor;
+import org.dataprocessing.utils.CustomExecutors;
 import org.dataprocessing.utils.Utils;
 
 import javax.sql.rowset.CachedRowSet;
@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -95,12 +94,7 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
                 updateProgress(localProgress.get(), 1.0);
                 table.add(header);
                 Iterable<? extends List<?>> partition = Iterables.partition(list, 10);
-                CustomThreadPoolExecutor threadPoolExecutor = new CustomThreadPoolExecutor(20,
-                                                                                           20,
-                                                                                           0L,
-                                                                                           TimeUnit.MILLISECONDS,
-                                                                                           new LinkedBlockingQueue<>()
-                );
+                ExecutorService threadPoolExecutor = CustomExecutors.newFixedThreadPool(20);
                 for (List<?> objects : partition) {
                     if (isCancelled()) {
                         break;
@@ -122,18 +116,16 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
                         return null;
                     });
                 }
-                threadPoolExecutor.shutdown();
-                try {
-                    if (!threadPoolExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                        logger.warn("Termination Timeout");
-                    }
-                }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                utils.shutdownExecutor(threadPoolExecutor, logger);
             }
         }
         return new ArrayList<>(table);
+    }
+
+    @Override
+    protected void succeeded() {
+        super.succeeded();
+        updateProgress(1.0, 1.0);
     }
 
     /**
@@ -143,11 +135,5 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
     protected void failed() {
         logger.fatal("Conversion Task failed", getException());
         System.exit(-1);
-    }
-
-    @Override
-    protected void succeeded() {
-        super.succeeded();
-        updateProgress(1.0, 1.0);
     }
 }

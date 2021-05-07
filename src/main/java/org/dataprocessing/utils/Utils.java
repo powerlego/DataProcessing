@@ -45,18 +45,6 @@ public class Utils {
         return data;
     }
 
-    public void shutdownExecutor(ExecutorService executorService, Logger logger) {
-        executorService.shutdown();
-        try {
-            if (!executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                logger.warn("Termination Timeout");
-            }
-        }
-        catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
     /**
      * Creates an empty table row of specified width
      *
@@ -85,6 +73,17 @@ public class Utils {
         return table;
     }
 
+    public Date getDateFormat(String dateString) {
+        try {
+            return dateFormat.parse(dateString);
+        }
+        catch (ParseException e) {
+            logger.fatal("Unable to parse date.", e);
+            System.exit(-1);
+            return null;
+        }
+    }
+
     public Window getWindow() {
         return window;
     }
@@ -97,17 +96,6 @@ public class Utils {
         return string == null || string.trim().isEmpty();
     }
 
-    public Date getDateFormat(String dateString) {
-        try {
-            return dateFormat.parse(dateString);
-        }
-        catch (ParseException e) {
-            logger.fatal("Unable to parse date.", e);
-            System.exit(-1);
-            return null;
-        }
-    }
-
     public List<List<String>> parallelSortListAscending(List<List<String>> list, int index) {
         List<String[]> listTemp = Converters.convertTableToTableArrayString(list);
         String[][] listArray = listTemp.toArray(new String[listTemp.size()][]);
@@ -116,25 +104,6 @@ public class Utils {
         return Converters.convertTableArrayToTableString(listTemp);
     }
 
-    /*@SafeVarargs
-    public final <T> List<List<String>> parallelSortListAscendingExcludeHeader(List<List<?>> list,
-                                                                           Comparator<?>... comparators
-    ){
-        List<Object[]> listTemp = Converters.convertTableToTableArray(list);
-        Object[][] listArray = listTemp.toArray(new Object[listTemp.size()][]);
-        //Comparator<?> comparatorChain = ComparatorUtils.chainedComparator(comparatorList);
-        list.parallelStream().sorted()
-        Collections.sort(list,);
-        Comparator<Object[]> chainedComparator = ComparatorUtils.chainedComparator(comparatorList);
-        Arrays.parallelSort(listArray,1,listArray.length,(Object[] o1, o2) -> {
-            int result = o1
-            if()
-        });
-        listTemp = new ArrayList<>(Arrays.asList(listArray));
-        return new ArrayList<>();
-        //return Converters.convertTableArrayToTableString(listTemp);
-    }*/
-
     public List<List<String>> parallelSortListDescending(List<List<String>> list, int index) {
         List<String[]> listTemp = Converters.convertTableToTableArrayString(list);
         String[][] listArray = listTemp.toArray(new String[listTemp.size()][]);
@@ -142,16 +111,6 @@ public class Utils {
         listTemp = new ArrayList<>(Arrays.asList(listArray));
         return Converters.convertTableArrayToTableString(listTemp);
     }
-
-    /*
-    public List<List<String>> parallelSortListAscendingExcludeHeader(List<List<String>> list, int sortingIndex) {
-        List<String[]> listTemp = Converters.convertTableToTableArray(list);
-        String[][] listArray = listTemp.toArray(new String[listTemp.size()][]);
-        Comparator<String[]> comparator = Comparator.comparing(strings -> strings[sortingIndex]);
-        Arrays.parallelSort(listArray, 1, listArray.length, comparator);
-        listTemp = new ArrayList<>(Arrays.asList(listArray));
-        return Converters.convertTableArrayToTable(listTemp);
-    }*/
 
     public List<List<String>> parallelSortListDescendingExcludeHeader(List<List<String>> list, int sortingIndex) {
         List<String[]> listTemp = Converters.convertTableToTableArrayString(list);
@@ -182,6 +141,10 @@ public class Utils {
         }
     }
 
+    public float round(float value, int places) {
+        return (float) round((double) value, places);
+    }
+
     public double round(double value, int places) {
         if (places < 0) {
             throw new IllegalArgumentException();
@@ -191,8 +154,16 @@ public class Utils {
         return bd.doubleValue();
     }
 
-    public float round(float value, int places) {
-        return (float) round((double) value, places);
+    public void shutdownExecutor(ExecutorService executorService, Logger logger) {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                logger.warn("Termination Timeout");
+            }
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**

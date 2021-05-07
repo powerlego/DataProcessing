@@ -19,38 +19,39 @@ import java.util.List;
  * @author Nicholas Curl
  */
 public class PorModel {
+
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger          logger   = LogManager.getLogger();
     /**
      * The instance of this class
      */
-    private static final PorModel instance = new PorModel();
+    private static final PorModel        instance = new PorModel();
     /**
      * The string property of the progress indicator's text
      */
-    private final StringProperty progLabelText;
+    private final        StringProperty  progLabelText;
     /**
      * The boolean property to specify if the gui is locked
      */
-    private final BooleanProperty locked;
+    private final        BooleanProperty locked;
     /**
      * The list of tasks being executed
      */
-    private final List<Task<?>> tasks;
+    private final        List<Task<?>>   tasks;
     /**
      * The string property of the path to store the mapped data
      */
-    private final StringProperty filePath;
+    private final        StringProperty  filePath;
     /**
      * The property of the total progress
      */
-    private DoubleBinding totalProgress;
+    private              DoubleBinding   totalProgress;
     /**
      * Is the gui cancelable
      */
-    private boolean cancelable;
+    private              boolean         cancelable;
 
     /**
      * Is the processing canceled

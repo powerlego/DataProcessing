@@ -370,8 +370,6 @@ public class FileUtils extends Utils {
                         int comments = 0;
                         int memo = 0;
                         int i = 1;
-                        CellReference tableStart = null;
-                        CellReference tableEnd = null;
                         loopBreak:
                         for (List<String> tableRow : table) {
                             if (tableRow.equals(tableHeaderRow)) {
@@ -386,52 +384,6 @@ public class FileUtils extends Utils {
                                 continue;
                             }
                             row = sheet.createRow(i);
-                            /*if (tableRow.get(0).toLowerCase().contains("contractid") || table.get(i-1).get(0).toLowerCase().contains("contractid")) {
-                                if ((i - 1) == 0) {
-                                    tableStart = new CellReference(0, 0);
-                                }
-                                else {
-                                    tableEnd = new CellReference(row.getRowNum() - 1, tableHeaderRow.size() - 1);
-                                    if (tableStart == null) {
-                                        tableStart = new CellReference(0, 0);
-                                    }
-                                    AreaReference reference = new AreaReference(tableStart,
-                                                                                tableEnd,
-                                                                                SpreadsheetVersion.EXCEL2007
-                                    );
-                                    XSSFTable xssfTable = sheet.createTable(reference);
-                                    xssfTable.getCTTable().addNewTableStyleInfo();
-                                    XSSFTableStyleInfo style = (XSSFTableStyleInfo) xssfTable.getStyle();
-                                    style.setName("TableStyleMedium16");
-                                    style.setShowColumnStripes(false);
-                                    style.setShowRowStripes(true);
-                                    style.setFirstColumn(false);
-                                    style.setLastColumn(false);
-                                    CTAutoFilter autoFilter = xssfTable.getCTTable().addNewAutoFilter();
-                                    autoFilter.setRef(reference.formatAsString());
-                                    tableStart = new CellReference(row.getRowNum(),0);
-                                }
-                            }
-                            if(i+1>=table.size() && table.get(0).get(0).toLowerCase().contains("contractid")){
-                                tableEnd = new CellReference(row.getRowNum(), tableHeaderRow.size());
-                                if (tableStart == null) {
-                                    tableStart = new CellReference(0, 0);
-                                }
-                                AreaReference reference = new AreaReference(tableStart,
-                                                                            tableEnd,
-                                                                            SpreadsheetVersion.EXCEL2007
-                                );
-                                XSSFTable xssfTable = sheet.createTable(reference);
-                                xssfTable.getCTTable().addNewTableStyleInfo();
-                                XSSFTableStyleInfo style = (XSSFTableStyleInfo) xssfTable.getStyle();
-                                style.setName("TableStyleMedium16");
-                                style.setShowColumnStripes(false);
-                                style.setShowRowStripes(true);
-                                style.setFirstColumn(false);
-                                style.setLastColumn(false);
-                                CTAutoFilter autoFilter = xssfTable.getCTTable().addNewAutoFilter();
-                                autoFilter.setRef(reference.formatAsString());
-                            }*/
                             for (int j = 0; j < tableRow.size(); j++) {
                                 if (table.get(0).get(j).toLowerCase().contains("memo")) {
                                     memo = j;
@@ -598,7 +550,6 @@ public class FileUtils extends Utils {
                             }
                             i++;
                         }
-                        //if (!table.get(0).get(0).toLowerCase().contains("contractid")) {
                         AreaReference reference = new AreaReference(new CellReference(0, 0),
                                                                     new CellReference(table.size() - 1,
                                                                                       tableHeaderRow.size() - 1
@@ -615,7 +566,6 @@ public class FileUtils extends Utils {
                         style.setLastColumn(false);
                         CTAutoFilter autoFilter = xssfTable.getCTTable().addNewAutoFilter();
                         autoFilter.setRef(reference.formatAsString());
-                        //}
                         for (int j = 0; j < tableHeaderRow.size(); j++) {
                             if (isCancelled()) {
                                 break;
@@ -634,7 +584,6 @@ public class FileUtils extends Utils {
                             progress += progressUpdate;
                             updateProgress(progress, 1.0);
                         }
-
                     }
                 }
                 if (!isCancelled()) {
@@ -671,7 +620,6 @@ public class FileUtils extends Utils {
                     logger.fatal("Unable to close workbook.", e);
                     System.exit(-1);
                 }
-
             }
             return null;
         }
@@ -999,7 +947,6 @@ public class FileUtils extends Utils {
                         progress += progressUpdate;
                         updateProgress(progress, 1.0);
                     }
-
                 }
                 if (!isCancelled()) {
                     try {
@@ -1035,7 +982,6 @@ public class FileUtils extends Utils {
                     logger.fatal("Unable to close workbook.", e);
                     System.exit(-1);
                 }
-
             }
             return null;
         }

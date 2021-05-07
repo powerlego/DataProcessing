@@ -19,27 +19,27 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger                   logger = LogManager.getLogger();
     /**
      * The new table without the duplicate data
      */
-    private final List<List<String>> newTable;
+    private final        List<List<String>>       newTable;
     /**
      * The list containing the duplicated data
      */
-    private final List<List<List<String>>> duplicatesList;
+    private final        List<List<List<String>>> duplicatesList;
     /**
      * The progress of finding the duplicate data
      */
-    private final DoubleProperty findProgress;
+    private final        DoubleProperty           findProgress;
     /**
      * The progress of removing the duplicated data
      */
-    private final DoubleProperty removeProgress;
+    private final        DoubleProperty           removeProgress;
     /**
      * The local copy of the table to remove the duplicated data from
      */
-    private List<List<String>> table;
+    private              List<List<String>>       table;
 
     /**
      * The constructor for this sub-task
@@ -158,13 +158,9 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
                 if (duplicatesNew.size() == 2) {
                     if (duplicatesNew.get(0).get(0).contains("HD") || duplicatesNew.get(1).get(0).contains("HD")) {
                         newTable.addAll(duplicatesNew);
-                    } else {
-                        newTable.add(duplicatesNew.get(0));/*
-                        if (duplicatesNew.get(1).get(0).contains(duplicatesNew.get(0).get(0))) {
-
-                        } else {
-                            newTable.addAll(duplicatesNew);
-                        }*/
+                    }
+                    else {
+                        newTable.add(duplicatesNew.get(0));
                     }
                     continue;
                 }
@@ -181,8 +177,14 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
      */
     private void updateTotalProgress() {
         updateProgress((Math.max(0, findProgress.get())
-                + Math.max(0, removeProgress.get())
-        ) / 2, 1.0);
+                        + Math.max(0, removeProgress.get())
+                       ) / 2, 1.0);
+    }
+
+    @Override
+    protected void succeeded() {
+        super.succeeded();
+        updateProgress(1.0, 1.0);
     }
 
     /**
@@ -201,11 +203,5 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
      */
     public void setTable(List<List<String>> table) {
         this.table = table;
-    }
-
-    @Override
-    protected void succeeded() {
-        super.succeeded();
-        updateProgress(1.0, 1.0);
     }
 }

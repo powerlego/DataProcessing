@@ -514,7 +514,6 @@ public class POROpenSales {
                                     switch (j) {
                                         case 0:
                                         case 1:
-
                                             mapRow[j] = row.get(0).trim() + "@";
                                             break;
                                         case 2:
@@ -548,19 +547,6 @@ public class POROpenSales {
                                             else {
                                                 mapRow[j] = "";
                                             }
-                                    /*if (i != 0) {
-                                        if (row.get(0)
-                                               .trim()
-                                               .equalsIgnoreCase(dataTempString.get(i - 1).get(0).trim())) {
-
-                                        }
-                                        else {
-
-                                        }
-                                    }
-                                    else {
-                                        mapRow[j] = row.get(28).trim() + "^";
-                                    }*/
                                             break;
                                         case 9:
                                             mapRow[j] = row.get(3).trim();
@@ -810,6 +796,7 @@ public class POROpenSales {
 
         private List<List<String>> data;
         private boolean            hasHeader = true;
+
         /**
          * Invoked when the Task is executed, the call method must be overridden and
          * implemented by subclasses. The call method actually performs the

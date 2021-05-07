@@ -15,5 +15,4 @@ public class DummyController {
     @FXMLViewFlowContext
     private ViewFlowContext context;
 
-
 }

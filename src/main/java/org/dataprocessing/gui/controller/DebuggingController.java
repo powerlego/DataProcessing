@@ -35,7 +35,6 @@ public class DebuggingController {
     private static final Utils           utils  = Utils.getInstance();
     @FXMLViewFlowContext
     private              ViewFlowContext context;
-
     @FXML
     private JFXSpinner progSpin;
     @FXML
@@ -87,9 +86,5 @@ public class DebuggingController {
                 }
             });
         });
-
-
     }
-
-
 }

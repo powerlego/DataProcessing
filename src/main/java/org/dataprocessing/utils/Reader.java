@@ -24,18 +24,19 @@ public class Reader extends Utils {
     private static final Logger logger = LogManager.getLogger();
 
     public Reader() {
-
     }
 
     public List<List<String>> readCSV(File csv) {
         try {
             CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(csv), StandardCharsets.UTF_8));
             return Converters.convertTableArrayToTableString(reader.readAll());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logger.fatal("Unable to read CSV.", e);
             System.exit(-1);
             return null;
-        } catch (CsvException e) {
+        }
+        catch (CsvException e) {
             logger.fatal("Invalid validator.", e);
             System.exit(-1);
             return null;
@@ -47,7 +48,8 @@ public class Reader extends Utils {
             Workbook wb = WorkbookFactory.create(dataFile);
             Sheet sheet = wb.getSheetAt(sheetNum);
             return readSheet(wb, sheet);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logger.fatal("Unable to create workbook.", e);
             return new ArrayList<>();
         }
@@ -78,7 +80,8 @@ public class Reader extends Utils {
         }
         try {
             wb.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logger.fatal("Unable to close workbook.", e);
         }
         return sheetConvert;
@@ -89,7 +92,8 @@ public class Reader extends Utils {
             Workbook wb = WorkbookFactory.create(dataFile);
             Sheet sheet = wb.getSheet(sheetTitle);
             return readSheet(wb, sheet);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logger.fatal("Unable to create workbook.", e);
             return new LinkedList<>();
         }

@@ -44,64 +44,65 @@ import java.util.*;
  */
 @ViewController(value = "/fxml/processing.fxml", title = "Data Processor")
 public class NavController {
+
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger                  logger          = LogManager.getLogger();
     /**
      * The instance of the Utils class
      */
-    private static final Utils utils = Utils.getInstance();
+    private static final Utils                   utils           = Utils.getInstance();
     /**
      * The instance of the FileUtils class
      */
-    private static final FileUtils fileUtils = FileUtils.getInstance();
+    private static final FileUtils               fileUtils       = FileUtils.getInstance();
     /**
      * The instance of the Alerts class
      */
-    private static final Alerts alerts = Alerts.getInstance();
+    private static final Alerts                  alerts          = Alerts.getInstance();
     /**
      * The instance of the NavModel class
      */
-    private static final NavModel model = NavModel.getInstance();
+    private static final NavModel                model           = NavModel.getInstance();
     /**
      * Instance of the ControllerUtils class
      */
-    private static final ControllerUtils controllerUtils = ControllerUtils.getInstance();
+    private static final ControllerUtils         controllerUtils = ControllerUtils.getInstance();
     /**
      * The map containing the file to process and the formats it contains
      */
-    private final Map<File, List<String>> fileFormats;
+    private final        Map<File, List<String>> fileFormats;
     /**
      * The map of the file to process and the company name associated to it
      */
-    private final Map<File, String> companyNames;
+    private final        Map<File, String>       companyNames;
     /**
      * The main window
      */
-    private final Window window;
+    private final        Window                  window;
     @FXMLViewFlowContext
-    private ViewFlowContext context;
+    private              ViewFlowContext         context;
     @FXML
-    private JFXButton mainCancelButton;
+    private              JFXButton               mainCancelButton;
     @FXML
-    private JFXButton processButton;
+    private              JFXButton               processButton;
     @FXML
-    private Label progress;
+    private              Label                   progress;
     @FXML
-    private JFXProgressBar progressBar;
+    private              JFXProgressBar          progressBar;
     @FXML
-    private JFXTextField filePath1;
+    private              JFXTextField            filePath1;
     @FXML
-    private JFXTextField filePath2;
+    private              JFXTextField            filePath2;
     @FXML
-    private JFXButton fileSelect1;
+    private              JFXButton               fileSelect1;
     @FXML
-    private JFXButton fileSelect2;
+    private              JFXButton               fileSelect2;
     @FXML
-    private StackPane root;
+    private              StackPane               root;
     @FXML
-    private Label processor;
+    private              Label                   processor;
 
     /**
      * The directory that contains the data to process
@@ -166,17 +167,34 @@ public class NavController {
         accept.getStyleClass().add("dialog-accept");
         List<String> formats = new ArrayList<>();
         accept.setOnAction(event -> {
-            if (expense.isSelected()) formats.add("expense");
-            if (ap.isSelected()) formats.add("ap");
-            if (ar.isSelected()) formats.add("ar");
-            if (purchase.isSelected()) formats.add("purchase");
-            if (sales.isSelected()) formats.add("sales");
-            if (credit.isSelected()) formats.add("credit");
-            if (balance.isSelected()) formats.add("balance");
-            if (vendor.isSelected()) formats.add("vendor");
+            if (expense.isSelected()) {
+                formats.add("expense");
+            }
+            if (ap.isSelected()) {
+                formats.add("ap");
+            }
+            if (ar.isSelected()) {
+                formats.add("ar");
+            }
+            if (purchase.isSelected()) {
+                formats.add("purchase");
+            }
+            if (sales.isSelected()) {
+                formats.add("sales");
+            }
+            if (credit.isSelected()) {
+                formats.add("credit");
+            }
+            if (balance.isSelected()) {
+                formats.add("balance");
+            }
+            if (vendor.isSelected()) {
+                formats.add("vendor");
+            }
             if (formats.size() < 1) {
                 alerts.alertWindow("Please select a format.", "Please select at least one format for this file.");
-            } else {
+            }
+            else {
                 fileFormats.put(file, formats);
                 fileFormat.hideWithAnimation();
             }
@@ -236,8 +254,11 @@ public class NavController {
             chooser.setTitle("Location of data files...");
             dataLocation = chooser.showDialog(window);
             if (dataLocation == null) {
-                alerts.alertWindow("Please select a file directory.", "Please select a directory that contains the data files.");
-            } else {
+                alerts.alertWindow("Please select a file directory.",
+                                   "Please select a directory that contains the data files."
+                );
+            }
+            else {
                 filePath1.setText(dataLocation.getPath());
                 model.setFilePath1(dataLocation.getPath());
                 filePath1.resetValidation();
@@ -257,8 +278,11 @@ public class NavController {
             chooser.setTitle("Location to store mapped data...");
             storageLocation = chooser.showDialog(window);
             if (storageLocation == null) {
-                alerts.alertWindow("Please select a file directory.", "Please select a directory that stores the mapped data files.");
-            } else {
+                alerts.alertWindow("Please select a file directory.",
+                                   "Please select a directory that stores the mapped data files."
+                );
+            }
+            else {
                 filePath2.setText(storageLocation.getPath());
                 model.setFilePath2(storageLocation.getPath());
                 filePath2.resetValidation();
@@ -289,17 +313,24 @@ public class NavController {
             progressBar.getStyleClass().remove("progress-success");
             progressBar.getStyleClass().remove("progress-cancel");
             if (dataLocation == null) {
-                alerts.alertWindow("Please select a file directory.", "Please select a directory that stores the mapped data files.");
-            } else {
+                alerts.alertWindow("Please select a file directory.",
+                                   "Please select a directory that stores the mapped data files."
+                );
+            }
+            else {
                 if (storageLocation == null) {
-                    alerts.alertWindow("Please select a file directory.", "Please select a directory that stores the mapped data files.");
-                } else {
+                    alerts.alertWindow("Please select a file directory.",
+                                       "Please select a directory that stores the mapped data files."
+                    );
+                }
+                else {
                     model.setLocked(true);
                     File[] files = dataLocation.listFiles();
                     try {
                         Objects.requireNonNull(files, "File list must not be null.");
                         processFiles(files);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         logger.fatal("Exception", e);
                         System.exit(-1);
                     }
@@ -317,12 +348,12 @@ public class NavController {
                                 Path companyFolder = navStoreLocation.resolve(companyNames.get(dataFile) + "/");
                                 try {
                                     Files.createDirectories(companyFolder);
-                                } catch (IOException e) {
+                                }
+                                catch (IOException e) {
                                     logger.fatal("Unable to create directories.", e);
                                     continue;
                                 }
                                 progressUpdate = progressUpdate / fileFormats.get(dataFile).size();
-
                                 for (String format : fileFormats.get(dataFile)) {
                                     switch (format) {
                                         case "expense":
@@ -354,7 +385,8 @@ public class NavController {
                                                 List<List<String>> mappedSheet = navVendor.getMapTable();
                                                 Path vendorMappedFile = companyFolder.resolve("Vendor Mapped.csv");
                                                 fileUtils.writeCSV(vendorMappedFile, mappedSheet);
-                                            } else {
+                                            }
+                                            else {
                                                 List<List<String>> sheet = converter.readSheet(dataFile, "Vendor");
                                                 navVendor.mapVendor(sheet);
                                                 List<List<String>> mappedSheet = navVendor.getMapTable();
@@ -405,23 +437,28 @@ public class NavController {
                 if (directoryFiles.length != 0) {
                     processFiles(directoryFiles);
                 }
-            } else {
+            }
+            else {
                 if (file.getName().contains(".csv")) {
                     singleFileFormat(file);
-                } else {
+                }
+                else {
                     try {
                         Workbook wb = WorkbookFactory.create(file);
                         int numSheets = wb.getNumberOfSheets();
                         wb.close();
                         if (numSheets <= 1) {
                             singleFileFormat(file);
-                        } else {
+                        }
+                        else {
                             fileFormats(numSheets, file);
                         }
-                    } catch (IOException e) {
+                    }
+                    catch (IOException e) {
                         logger.fatal("Unable to create workbook", e);
                         System.exit(-1);
-                    } catch (EncryptedDocumentException e) {
+                    }
+                    catch (EncryptedDocumentException e) {
                         logger.fatal("Document is encrypted", e);
                         System.exit(-1);
                     }
@@ -477,17 +514,34 @@ public class NavController {
         accept.getStyleClass().add("dialog-accept");
         List<String> formats = new ArrayList<>();
         accept.setOnAction(event -> {
-            if (expense.isSelected()) formats.add("expense");
-            if (ap.isSelected()) formats.add("ap");
-            if (ar.isSelected()) formats.add("ar");
-            if (purchase.isSelected()) formats.add("purchase");
-            if (sales.isSelected()) formats.add("sales");
-            if (credit.isSelected()) formats.add("credit");
-            if (balance.isSelected()) formats.add("balance");
-            if (vendor.isSelected()) formats.add("vendor");
+            if (expense.isSelected()) {
+                formats.add("expense");
+            }
+            if (ap.isSelected()) {
+                formats.add("ap");
+            }
+            if (ar.isSelected()) {
+                formats.add("ar");
+            }
+            if (purchase.isSelected()) {
+                formats.add("purchase");
+            }
+            if (sales.isSelected()) {
+                formats.add("sales");
+            }
+            if (credit.isSelected()) {
+                formats.add("credit");
+            }
+            if (balance.isSelected()) {
+                formats.add("balance");
+            }
+            if (vendor.isSelected()) {
+                formats.add("vendor");
+            }
             if (formats.size() < 1) {
                 alerts.alertWindow("Please select a format.", "Please select at least one format for this file.");
-            } else {
+            }
+            else {
                 fileFormats.put(file, formats);
                 fileFormat.hideWithAnimation();
             }

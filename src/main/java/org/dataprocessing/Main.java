@@ -24,11 +24,11 @@ import java.io.IOException;
 
 public class Main extends Application {
 
-    private static final Logger logger = LogManager.getLogger();
-    private static final Utils utils = Utils.getInstance();
-    private static final SqlServer server = SqlServer.getInstance();
+    private static final Logger          logger = LogManager.getLogger();
+    private static final Utils           utils  = Utils.getInstance();
+    private static final SqlServer       server = SqlServer.getInstance();
     @FXMLViewFlowContext
-    private ViewFlowContext flowContext;
+    private              ViewFlowContext flowContext;
 
     public static void main(String[] args) {
         launch(args);
@@ -87,8 +87,10 @@ public class Main extends Application {
         Thread thread = new Thread(() -> {
             try {
                 SVGGlyphLoader.loadGlyphsFont(Main.class.getResourceAsStream("/fonts/icomoon.svg"),
-                        "icomoon.svg");
-            } catch (IOException ioExc) {
+                                              "icomoon.svg"
+                );
+            }
+            catch (IOException ioExc) {
                 logger.fatal("Cannot Load SVG Glyphs", ioExc);
                 System.exit(-1);
             }
@@ -109,15 +111,17 @@ public class Main extends Application {
             Rectangle2D bounds = Screen.getScreens().get(0).getBounds();
             width = bounds.getWidth() / 2.5;
             height = bounds.getHeight() / 1.35;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logger.fatal("Index out of Bounds", e);
             System.exit(-1);
         }
         Scene scene = new Scene(decorator, width, height);
         final ObservableList<String> stylesheets = scene.getStylesheets();
         stylesheets.addAll(JFoenixResources.load("/css/jfoenix-fonts.css").toExternalForm(),
-                JFoenixResources.load("/css/jfoenix-design.css").toExternalForm(),
-                Main.class.getResource("/css/styling.css").toExternalForm());
+                           JFoenixResources.load("/css/jfoenix-design.css").toExternalForm(),
+                           Main.class.getResource("/css/styling.css").toExternalForm()
+        );
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(event -> {
             thread.interrupt();

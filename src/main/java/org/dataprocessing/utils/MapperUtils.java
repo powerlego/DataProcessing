@@ -20,7 +20,7 @@ import java.util.Map;
 public class MapperUtils extends Utils {
 
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger      logger   = LogManager.getLogger();
     private static final MapperUtils instance = new MapperUtils();
 
     public static MapperUtils getInstance() {
@@ -34,24 +34,30 @@ public class MapperUtils extends Utils {
         return mapTable;
     }
 
-    /**
-     * Get the header from the specified template
-     *
-     * @param template The template to get the header from
-     *
-     * @return The header from the template
-     */
-    public List<String> getHeader(String template) {
-        List<String> header;
+    public Map<String, String> getCorrections(String correctionsFile) {
+        String line;
+        Map<String, String> corrections = new HashMap<>();
         try {
-            Workbook wb = WorkbookFactory.create(getClass().getResourceAsStream(template));
-            header = getHeaderFromFile(wb);
-            wb.close();
-        } catch (IOException exception) {
-            logger.fatal("Unable to get header", exception);
-            header = new ArrayList<>();
+            Path path = Paths.get(correctionsFile);
+            Path parentPath = path.getParent();
+            try {
+                Files.createDirectories(parentPath);
+                Files.createFile(path);
+            }
+            catch (FileAlreadyExistsException ignored) {
+            }
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(path.toFile()));
+            BufferedReader fileBuff = new BufferedReader(streamReader);
+            while ((line = fileBuff.readLine()) != null) {
+                String[] split = line.split(" : ");
+                corrections.put(split[0], split[1]);
+            }
+            fileBuff.close();
         }
-        return header;
+        catch (IOException e) {
+            logger.fatal("Unable to get corrections.", e);
+        }
+        return corrections;
     }
 
     private List<String> getHeaderFromFile(Workbook wb) {
@@ -70,28 +76,25 @@ public class MapperUtils extends Utils {
         return rowList;
     }
 
-    public Map<String, String> getCorrections(String correctionsFile) {
-        String line;
-        Map<String, String> corrections = new HashMap<>();
+    /**
+     * Get the header from the specified template
+     *
+     * @param template The template to get the header from
+     *
+     * @return The header from the template
+     */
+    public List<String> getHeader(String template) {
+        List<String> header;
         try {
-            Path path = Paths.get(correctionsFile);
-            Path parentPath = path.getParent();
-            try {
-                Files.createDirectories(parentPath);
-                Files.createFile(path);
-            } catch (FileAlreadyExistsException ignored) {
-            }
-            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(path.toFile()));
-            BufferedReader fileBuff = new BufferedReader(streamReader);
-            while ((line = fileBuff.readLine()) != null) {
-                String[] split = line.split(" : ");
-                corrections.put(split[0], split[1]);
-            }
-            fileBuff.close();
-        } catch (IOException e) {
-            logger.fatal("Unable to get corrections.", e);
+            Workbook wb = WorkbookFactory.create(getClass().getResourceAsStream(template));
+            header = getHeaderFromFile(wb);
+            wb.close();
         }
-        return corrections;
+        catch (IOException exception) {
+            logger.fatal("Unable to get header", exception);
+            header = new ArrayList<>();
+        }
+        return header;
     }
 
     public void writeCorrections(Map<String, String> corrections, String correctionsFile) {
@@ -103,7 +106,8 @@ public class MapperUtils extends Utils {
                 writer.flush();
             }
             writer.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logger.fatal("Unable to write corrections", e);
         }
     }

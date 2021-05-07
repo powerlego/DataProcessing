@@ -37,7 +37,6 @@ public class Converters {
 
     public static List<Object[]> convertTableToTableArray(List<List<?>> table) {
         List<Object[]> tableNew = new ArrayList<>();
-
         for (List<?> row : table) {
             Object[] rowArray = row.toArray(new Object[0]);
             tableNew.add(rowArray);
@@ -54,7 +53,6 @@ public class Converters {
      */
     public static List<String[]> convertTableToTableArrayString(List<List<String>> table) {
         List<String[]> tableNew = new ArrayList<>();
-
         for (List<String> row : table) {
             String[] rowArray = row.toArray(new String[0]);
             tableNew.add(rowArray);

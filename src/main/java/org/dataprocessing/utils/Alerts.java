@@ -27,7 +27,7 @@ public class Alerts {
     /**
      * Instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger   = LogManager.getLogger();
     /**
      * This class's instance
      */
@@ -35,7 +35,7 @@ public class Alerts {
     /**
      * The instance of the Utils class
      */
-    private static final Utils utils = Utils.getInstance();
+    private static final Utils  utils    = Utils.getInstance();
 
     /**
      * Gets this class's instance

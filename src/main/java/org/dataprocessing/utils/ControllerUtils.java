@@ -25,11 +25,11 @@ public class ControllerUtils extends Utils {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger          logger   = LogManager.getLogger();
     /**
      * The instance of the Utils class
      */
-    private static final Utils utils = Utils.getInstance();
+    private static final Utils           utils    = Utils.getInstance();
     /**
      * The instance of this class
      */
@@ -37,7 +37,7 @@ public class ControllerUtils extends Utils {
     /**
      * The main window
      */
-    private final Window window = getWindow();
+    private final        Window          window   = getWindow();
 
     /**
      * Gets this class's instance
@@ -74,7 +74,8 @@ public class ControllerUtils extends Utils {
             if (!newValue) {
                 if (utils.isBlankString(field.getText())) {
                     field.validate();
-                } else {
+                }
+                else {
                     field.resetValidation();
                 }
             }
@@ -87,7 +88,8 @@ public class ControllerUtils extends Utils {
         accept.setOnAction(event -> {
             if (utils.isBlankString(field.getText())) {
                 field.validate();
-            } else {
+            }
+            else {
                 companyNames.put(file, field.getText());
                 alert.hideWithAnimation();
             }

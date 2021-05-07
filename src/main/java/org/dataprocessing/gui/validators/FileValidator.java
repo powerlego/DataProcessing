@@ -37,7 +37,8 @@ public class FileValidator extends ValidatorBase {
         try {
             Path path = Paths.get(text);
             hasErrors.set(!path.toFile().exists());
-        } catch (InvalidPathException e) {
+        }
+        catch (InvalidPathException e) {
             hasErrors.set(true);
         }
     }

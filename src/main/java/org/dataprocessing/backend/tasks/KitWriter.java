@@ -100,7 +100,6 @@ public class KitWriter {
         private final File                            filename;
         private       MultiValuedMap<String, List<?>> kits;
 
-
         private KitXlsxTask(File filename) {
             this.filename = filename;
         }

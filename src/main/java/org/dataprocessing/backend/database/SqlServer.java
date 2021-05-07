@@ -12,31 +12,32 @@ import java.sql.*;
  * @author Nicholas Curl
  */
 public class SqlServer {
+
     /**
      * The instance of the logger
      */
-    private static final Logger    logger         = LogManager.getLogger();
+    private static final Logger     logger         = LogManager.getLogger();
     /**
      * The connection string for the database
      */
-    private static final String    dbString       = "jdbc:sqlserver://localhost\\SQLEXPRESS;database=POR3";
+    private static final String     dbString       = "jdbc:sqlserver://localhost\\SQLEXPRESS;database=POR3";
     /**
      * The username to login into the server
      */
-    private static final String    user           = "dataprocessing";
+    private static final String     user           = "dataprocessing";
     /**
      * The password to login into the server
      */
-    private static final String pwd = "dataprocessing";
+    private static final String     pwd            = "dataprocessing";
     /**
      * Create a static instance
      */
-    private static final SqlServer serverInstance = new SqlServer();
+    private static final SqlServer  serverInstance = new SqlServer();
     /**
      * The connection to the server
      */
-    private Connection connection = null;
-    private boolean closed;
+    private              Connection connection     = null;
+    private              boolean    closed;
 
     /**
      * The constructor for the class that registers the Microsoft SQL Server driver
@@ -45,7 +46,8 @@ public class SqlServer {
         closed = true;
         try {
             DriverManager.registerDriver(new SQLServerDriver());
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to register driver", e);
             System.exit(-1);
         }
@@ -70,7 +72,8 @@ public class SqlServer {
                 connection.close();
                 closed = true;
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to close server connection", e);
             System.exit(-1);
         }
@@ -84,7 +87,8 @@ public class SqlServer {
     public Connection getConnection() {
         if (connection == null) {
             return connectToServer();
-        } else {
+        }
+        else {
             return connection;
         }
     }
@@ -97,7 +101,6 @@ public class SqlServer {
     public Connection connectToServer() {
         try {
             connection = DriverManager.getConnection(dbString, user, pwd);
-
             if (connection != null) {
                 String connectionString = "Connected\n";
                 DatabaseMetaData dm = connection.getMetaData();
@@ -106,19 +109,18 @@ public class SqlServer {
                 connectionString += "Product name: " + dm.getDatabaseProductName() + "\n";
                 connectionString += "Product version: " + dm.getDatabaseProductVersion();
                 logger.debug(connectionString);
-                logger.debug(connection.getClientInfo().toString());
-                logger.debug(connection.getTypeMap().toString());
                 closed = false;
                 return connection;
-            } else {
+            }
+            else {
                 return null;
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to to connect to server.", e);
             System.exit(-1);
             return null;
         }
-
     }
 
     /**
@@ -136,7 +138,8 @@ public class SqlServer {
             ResultSetMetaData tableMeta = table.getMetaData();
             int colCount = tableMeta.getColumnCount();
             progressUpdate = (1 / (double) rowCount) * (1 / (double) colCount);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to get local progress.", e);
             System.exit(-1);
         }
@@ -154,7 +157,8 @@ public class SqlServer {
         try {
             Statement statement = connection.createStatement();
             return statement.executeQuery(sql);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to process query.", e);
             System.exit(-1);
             return null;
@@ -169,14 +173,14 @@ public class SqlServer {
      * @return The number of results from the query
      */
     public int getQueryCount(String sql) {
-
         String[] split = sql.split("(?<=SELECT)(.*?)(?=FROM)", 2);
         String countSql = split[0] + " count(*) " + split[1];
         try {
             ResultSet resultSet = queryServer(countSql);
             resultSet.next();
             return resultSet.getInt(1);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to get count of query.", e);
             System.exit(-1);
             return -1;
@@ -196,7 +200,8 @@ public class SqlServer {
             ResultSet resultSet = queryServer(sql);
             resultSet.next();
             return resultSet.getString(1);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             logger.fatal("Unable to get vendor name.", e);
             System.exit(-1);
             return null;

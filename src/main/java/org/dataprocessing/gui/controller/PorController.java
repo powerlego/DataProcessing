@@ -45,14 +45,15 @@ import java.util.concurrent.Executors;
  */
 @ViewController(value = "/fxml/databaseProcessing.fxml", title = "Data Processor")
 public class PorController {
+
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger    logger    = LogManager.getLogger();
     /**
      * The instance of the SqlServer class
      */
-    private static final SqlServer server = SqlServer.getInstance();
+    private static final SqlServer server    = SqlServer.getInstance();
     /**
      * The instance of the FileUtils class
      */
@@ -60,43 +61,43 @@ public class PorController {
     /**
      * The instance of the Utils class
      */
-    private static final Utils utils = Utils.getInstance();
+    private static final Utils     utils     = Utils.getInstance();
     /**
      * The instance of the Alerts class
      */
-    private static final Alerts alerts = Alerts.getInstance();
+    private static final Alerts    alerts    = Alerts.getInstance();
     /**
      * The instance of the PorModel class
      */
-    private static final PorModel model = PorModel.getInstance();
+    private static final PorModel  model     = PorModel.getInstance();
     /**
      * The main window
      */
-    private final Window window;
+    private final        Window    window;
 
     @FXMLViewFlowContext
     private ViewFlowContext context;
     @FXML
-    private StackPane root;
+    private StackPane       root;
     @FXML
-    private Label processor;
+    private Label           processor;
     @FXML
-    private Label progLabel;
+    private Label           progLabel;
     @FXML
-    private JFXSpinner progSpin;
+    private JFXSpinner      progSpin;
     @FXML
-    private JFXButton processButton;
+    private JFXButton       processButton;
     @FXML
-    private JFXButton mainCancelButton;
+    private JFXButton       mainCancelButton;
     @FXML
-    private JFXButton fileSelect;
+    private JFXButton       fileSelect;
     @FXML
-    private JFXTextField filePath;
+    private JFXTextField    filePath;
 
     /**
      * The directory to store the mapped data
      */
-    private File storageLocation;
+    private File           storageLocation;
     private BooleanBinding complete;
 
     /**
@@ -160,8 +161,11 @@ public class PorController {
             chooser.setTitle("Location to store mapped data...");
             storageLocation = chooser.showDialog(window);
             if (storageLocation == null) {
-                alerts.alertWindow("Please select a file directory.", "Please select a directory that stores the mapped data files.");
-            } else {
+                alerts.alertWindow("Please select a file directory.",
+                                   "Please select a directory that stores the mapped data files."
+                );
+            }
+            else {
                 filePath.setText(storageLocation.getPath());
                 model.setFilePath(storageLocation.getPath());
                 filePath.resetValidation();
@@ -180,15 +184,19 @@ public class PorController {
             progSpin.getStyleClass().remove("custom-spinner-cancel");
             model.setCanceled(false);
             if (!filePath.validate()) {
-                alerts.alertWindow("Please select a file directory.", "Please select a directory that stores the mapped data files.");
-            } else {
+                alerts.alertWindow("Please select a file directory.",
+                                   "Please select a directory that stores the mapped data files."
+                );
+            }
+            else {
                 ExecutorService executor = Executors.newCachedThreadPool();
                 server.connectToServer();
                 Path storeLocation = Paths.get(storageLocation.toURI());
                 Path porStoreLocation = storeLocation.resolve("POR/");
                 try {
                     Files.createDirectories(porStoreLocation);
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     logger.fatal("Unable to create directories.", e);
                     System.exit(-1);
                 }
@@ -203,24 +211,36 @@ public class PorController {
                 model.addTasks(porOpenSales.getTasks());
                 model.addTasks(porOpenPO.getTasks());
                 DoubleBinding totalProgress = Bindings.createDoubleBinding(() -> (
-                                Math.max(0, porCustomer.getOverallTaskProgress()) +
-                                        Math.max(0, porItemMaster.getTotalProgress()) +
-                                        Math.max(0, porOpenAR.getTotalProgress()) +
-                                        Math.max(0, porOpenSales.getTotalProgress()) +
-                                        Math.max(0, porOpenPO.getTotalProgress())
-                        ) / 5,
-                        porCustomer.overallTaskProgressProperty(),
-                        porItemMaster.totalProgressProperty(),
-                        porOpenAR.totalProgressProperty(),
-                        porOpenSales.totalProgressProperty(),
-                        porOpenPO.totalProgressProperty()
+                                                                                         Math.max(0,
+                                                                                                  porCustomer.getOverallTaskProgress()
+                                                                                         ) +
+                                                                                         Math.max(0,
+                                                                                                  porItemMaster.getTotalProgress()
+                                                                                         ) +
+                                                                                         Math.max(0,
+                                                                                                  porOpenAR.getTotalProgress()
+                                                                                         ) +
+                                                                                         Math.max(0,
+                                                                                                  porOpenSales.getTotalProgress()
+                                                                                         ) +
+                                                                                         Math.max(0,
+                                                                                                  porOpenPO.getTotalProgress()
+                                                                                         )
+                                                                                 ) / 5,
+                                                                           porCustomer.overallTaskProgressProperty(),
+                                                                           porItemMaster.totalProgressProperty(),
+                                                                           porOpenAR.totalProgressProperty(),
+                                                                           porOpenSales.totalProgressProperty(),
+                                                                           porOpenPO.totalProgressProperty()
                 );
                 model.setTotalProgressProperty(totalProgress);
                 model.setProgLabelText("Processing...");
                 model.setLocked(true);
                 model.setCancelable(true);
                 progSpin.progressProperty().bind(totalProgress);
-                complete = Bindings.createBooleanBinding(() -> (Math.abs(1.0 - totalProgress.get()) <= 5e-5), totalProgress);
+                complete = Bindings.createBooleanBinding(() -> (Math.abs(1.0 - totalProgress.get()) <= 5e-5),
+                                                         totalProgress
+                );
                 porCustomer.map(executor);
                 porItemMaster.map(executor);
                 porOpenAR.map(executor);
@@ -230,7 +250,10 @@ public class PorController {
                 context.register("StyleClasses", styleList);
                 complete.addListener(new ChangeListener<Boolean>() {
                     @Override
-                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                    public void changed(ObservableValue<? extends Boolean> observable,
+                                        Boolean oldValue,
+                                        Boolean newValue
+                    ) {
                         if (newValue) {
                             progSpin.getStyleClass().add("custom-spinner-success");
                             model.setProgLabelText("Complete");

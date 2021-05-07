@@ -23,11 +23,11 @@ import java.util.function.Function;
  */
 public class ExtendedAnimatedFlowContainer extends AnimatedFlowContainer implements FlowContainer<StackPane> {
 
-    private final StackPane view;
-    private final Duration duration;
-    private final ImageView placeholder;
-    private Function<AnimatedFlowContainer, List<KeyFrame>> animationProducer;
-    private Timeline animation;
+    private final StackPane                                       view;
+    private final Duration                                        duration;
+    private final ImageView                                       placeholder;
+    private       Function<AnimatedFlowContainer, List<KeyFrame>> animationProducer;
+    private       Timeline                                        animation;
 
     /**
      * Defaults constructor that creates a container with a fade animation that last 320 ms.
@@ -62,7 +62,8 @@ public class ExtendedAnimatedFlowContainer extends AnimatedFlowContainer impleme
      * @param animationProducer the {@link KeyFrame} instances that define the animation
      */
     public ExtendedAnimatedFlowContainer(Duration duration, Function<AnimatedFlowContainer, List<KeyFrame>>
-            animationProducer) {
+            animationProducer
+    ) {
         this.view = new StackPane();
         this.duration = duration;
         this.animationProducer = animationProducer;
@@ -115,11 +116,13 @@ public class ExtendedAnimatedFlowContainer extends AnimatedFlowContainer impleme
             SnapshotParameters parameters = new SnapshotParameters();
             parameters.setFill(Color.TRANSPARENT);
             Image placeholderImage = view.snapshot(parameters,
-                    new WritableImage((int) view.getWidth(), (int) view.getHeight()));
+                                                   new WritableImage((int) view.getWidth(), (int) view.getHeight())
+            );
             placeholder.setImage(placeholderImage);
             placeholder.setFitWidth(placeholderImage.getWidth());
             placeholder.setFitHeight(placeholderImage.getHeight());
-        } else {
+        }
+        else {
             placeholder.setImage(null);
         }
         placeholder.setVisible(true);

@@ -64,7 +64,8 @@ public class SideMenuController {
                 if (newVal != null) {
                     try {
                         contentFlowHandler.handle(newVal.getId());
-                    } catch (VetoException | FlowException exc) {
+                    }
+                    catch (VetoException | FlowException exc) {
                         logger.fatal("Exception", exc);
                         System.exit(-1);
                     }

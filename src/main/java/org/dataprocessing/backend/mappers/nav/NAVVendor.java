@@ -14,30 +14,31 @@ import java.util.List;
  * @author Nicholas Curl
  */
 public class NAVVendor {
+
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger             logger      = LogManager.getLogger();
     /**
      * The instance of the Utils class
      */
-    private static final Utils utils = Utils.getInstance();
+    private static final Utils              utils       = Utils.getInstance();
     /**
      * The instance of the MapperUtils class
      */
-    private static final MapperUtils mapperUtils = MapperUtils.getInstance();
+    private static final MapperUtils        mapperUtils = MapperUtils.getInstance();
     /**
      * The template associated with this mapping
      */
-    private static final String template = "/templates/Vendor Template_MFG FINAL V1.xlsx";
+    private static final String             template    = "/templates/Vendor Template_MFG FINAL V1.xlsx";
     /**
      * The header of the template
      */
-    private final List<String> header;
+    private final        List<String>       header;
     /**
      * The table that stores the mapped data
      */
-    private final List<List<String>> mapTable;
+    private final        List<List<String>> mapTable;
 
     /**
      * The constructor for this class that creates the template header and the table to store the mapped data
@@ -75,7 +76,8 @@ public class NAVVendor {
                             String cell = row.get(72);
                             if (cell.equalsIgnoreCase("Legal Entity")) {
                                 mapRow.add(j, "FALSE");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, "TRUE");
                             }
                             break;
@@ -124,7 +126,8 @@ public class NAVVendor {
                         case 52:
                             if (!utils.isBlankString(row.get(67))) {
                                 mapRow.add(j, "TRUE");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, "FALSE");
                             }
                             break;

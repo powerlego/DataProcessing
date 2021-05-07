@@ -74,6 +74,16 @@ public class Subassembly {
         return getAssemblyKey().equals(that.getAssemblyKey()) && getAssemblyItems().equals(that.getAssemblyItems());
     }
 
+    @Override
+    public String toString() {
+        return "Subassembly{" +
+               "assemblyKey='" + assemblyKey + '\'' +
+               ", name='" + name + '\'' +
+               ", isChildSubassembly=" + isChildSubassembly +
+               ", assemblyItems=" + assemblyItems +
+               '}';
+    }
+
     public List<AssemblyItem> getAssemblyItems() {
         return assemblyItems;
     }
@@ -88,16 +98,6 @@ public class Subassembly {
 
     public void setChildSubassembly(boolean childSubassembly) {
         isChildSubassembly = childSubassembly;
-    }
-
-    @Override
-    public String toString() {
-        return "Subassembly{" +
-               "assemblyKey='" + assemblyKey + '\'' +
-               ", name='" + name + '\'' +
-               ", isChildSubassembly=" + isChildSubassembly +
-               ", assemblyItems=" + assemblyItems +
-               '}';
     }
 
     public void sortAssemblyItems() {

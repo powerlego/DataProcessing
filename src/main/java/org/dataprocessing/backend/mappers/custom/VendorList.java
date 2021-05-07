@@ -26,31 +26,31 @@ public class VendorList {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger                 logger    = LogManager.getLogger();
     /**
      * The instance of the FileUtils class
      */
-    private static final FileUtils fileUtils = FileUtils.getInstance();
+    private static final FileUtils              fileUtils = FileUtils.getInstance();
     /**
      * The template mapping task
      */
-    private final MapTemplate mapTemplate;
+    private final        MapTemplate            mapTemplate;
     /**
      * The server table convert task
      */
-    private final ServerTableConvertTask tableConvertTask;
+    private final        ServerTableConvertTask tableConvertTask;
     /**
      * The excel writing task
      */
-    private final FileUtils.XlsxTask writeTask;
+    private final        FileUtils.XlsxTask     writeTask;
     /**
      * The list of sub-tasks
      */
-    private final List<Task<?>> tasks;
+    private final        List<Task<?>>          tasks;
     /**
      * The total progress of this task
      */
-    private final DoubleBinding totalProgress;
+    private final        DoubleBinding          totalProgress;
 
     /**
      * The constructor for this class
@@ -62,46 +62,46 @@ public class VendorList {
         mapTemplate = new MapTemplate();
         tableConvertTask = new ServerTableConvertTask(
                 "SELECT PO.PONumber,\n" +
-                        "       PO.Store,\n" +
-                        "       PO.Date,\n" +
-                        "       PO.Notes,\n" +
-                        "       I.[KEY],\n" +
-                        "       POD.ItemName,\n" +
-                        "       POD.Comments,\n" +
-                        "       POD.PriceEach,\n" +
-                        "       POD.QuantityOrdered,\n" +
-                        "       VF.Terms,\n" +
-                        "       VF.Address1,\n" +
-                        "       VF.Address2,\n" +
-                        "       VF.CityState,\n" +
-                        "       VF.Zip,\n" +
-                        "       VF.Contact1,\n" +
-                        "       VF.Phone,\n" +
-                        "       VF.Contact1Email,\n" +
-                        "       VF.Fax,\n" +
-                        "       I.CurrentStore,\n" +
-                        "       ID.DepartmentName,\n" +
-                        "       PO.VendorNumber,\n" +
-                        "       VF.VendorName\n" +
-                        "FROM PurchaseOrder PO\n" +
-                        "         INNER JOIN PurchaseOrderDetail POD on PO.PONumber = POD.PONumber\n" +
-                        "         LEFT JOIN VendorFile VF on PO.VendorNumber = VF.VendorNumber\n" +
-                        "         LEFT JOIN ItemFile I on POD.ItemNumber = I.NUM\n" +
-                        "         LEFT JOIN ItemDepartment ID on I.Department = ID.Department\n" +
-                        "WHERE PO.Status LIKE 'O%'"
+                "       PO.Store,\n" +
+                "       PO.Date,\n" +
+                "       PO.Notes,\n" +
+                "       I.[KEY],\n" +
+                "       POD.ItemName,\n" +
+                "       POD.Comments,\n" +
+                "       POD.PriceEach,\n" +
+                "       POD.QuantityOrdered,\n" +
+                "       VF.Terms,\n" +
+                "       VF.Address1,\n" +
+                "       VF.Address2,\n" +
+                "       VF.CityState,\n" +
+                "       VF.Zip,\n" +
+                "       VF.Contact1,\n" +
+                "       VF.Phone,\n" +
+                "       VF.Contact1Email,\n" +
+                "       VF.Fax,\n" +
+                "       I.CurrentStore,\n" +
+                "       ID.DepartmentName,\n" +
+                "       PO.VendorNumber,\n" +
+                "       VF.VendorName\n" +
+                "FROM PurchaseOrder PO\n" +
+                "         INNER JOIN PurchaseOrderDetail POD on PO.PONumber = POD.PONumber\n" +
+                "         LEFT JOIN VendorFile VF on PO.VendorNumber = VF.VendorNumber\n" +
+                "         LEFT JOIN ItemFile I on POD.ItemNumber = I.NUM\n" +
+                "         LEFT JOIN ItemDepartment ID on I.Department = ID.Department\n" +
+                "WHERE PO.Status LIKE 'O%'"
         );
         writeTask = fileUtils.writeXlsxTask(storeLocation.resolve("Vendor List.xlsx"));
         tasks.add(tableConvertTask);
         tasks.add(mapTemplate);
         tasks.add(writeTask);
         totalProgress = Bindings.createDoubleBinding(() -> (
-                        Math.max(0, tableConvertTask.getProgress()) +
-                                Math.max(0, mapTemplate.getProgress()) +
-                                Math.max(0, writeTask.getProgress())
-                ) / 3,
-                tableConvertTask.progressProperty(),
-                mapTemplate.progressProperty(),
-                writeTask.progressProperty()
+                                                                   Math.max(0, tableConvertTask.getProgress()) +
+                                                                   Math.max(0, mapTemplate.getProgress()) +
+                                                                   Math.max(0, writeTask.getProgress())
+                                                           ) / 3,
+                                                     tableConvertTask.progressProperty(),
+                                                     mapTemplate.progressProperty(),
+                                                     writeTask.progressProperty()
         );
     }
 
@@ -157,35 +157,35 @@ public class VendorList {
         /**
          * The instance of the logger
          */
-        private static final Logger logger = LogManager.getLogger();
+        private static final Logger             logger      = LogManager.getLogger();
         /**
          * The instance of the Utils class
          */
-        private static final Utils utils = Utils.getInstance();
+        private static final Utils              utils       = Utils.getInstance();
         /**
          * The instance of the MapperUtils class
          */
-        private static final MapperUtils mapperUtils = MapperUtils.getInstance();
+        private static final MapperUtils        mapperUtils = MapperUtils.getInstance();
         /**
          * The instance of SqlServer Class
          */
-        private static final SqlServer server = SqlServer.getInstance();
+        private static final SqlServer          server      = SqlServer.getInstance();
         /**
          * The template associated with this mapping
          */
-        private static final String template = "/templates/Open Purchase Order Template_MFG FINAL.xlsx";
+        private static final String             template    = "/templates/Open Purchase Order Template_MFG FINAL.xlsx";
         /**
          * The header of the template
          */
-        private final List<String> header;
+        private final        List<String>       header;
         /**
          * The table that stores the mapped data
          */
-        private final List<List<String>> mapTable;
+        private final        List<List<String>> mapTable;
         /**
          * Local copy of the data to map
          */
-        private List<List<String>> data;
+        private              List<List<String>> data;
 
         /**
          * The constructor for this inner class
@@ -236,7 +236,8 @@ public class VendorList {
                                         updateProgress(progress, 1.0);
                                         break rowBreak;
                                     }
-                                } catch (NumberFormatException ignored) {
+                                }
+                                catch (NumberFormatException ignored) {
                                 }
                             }
                             mapRow.add(j, row.get(20).trim() + "#");
@@ -264,10 +265,12 @@ public class VendorList {
                             if (i != 1) {
                                 if (row.get(0).trim().equalsIgnoreCase(data.get(i - 1).get(0).trim())) {
                                     mapRow.add(j, "");
-                                } else {
+                                }
+                                else {
                                     mapRow.add(j, row.get(3).trim() + "^");
                                 }
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, row.get(3).trim() + "^");
                             }
                             break;
@@ -275,7 +278,8 @@ public class VendorList {
                             String location = row.get(1).trim();
                             if (location.equalsIgnoreCase("003")) {
                                 mapRow.add(j, "Houston Depot");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, "Memphis");
                             }
                             break;
@@ -294,7 +298,8 @@ public class VendorList {
                             try {
                                 qty = Double.parseDouble(row.get(8).trim());
                                 perUnit = Double.parseDouble(row.get(7).trim());
-                            } catch (NumberFormatException ignored) {
+                            }
+                            catch (NumberFormatException ignored) {
                             }
                             double amount = qty * perUnit;
                             mapRow.add(j, amount + "$");
@@ -309,7 +314,8 @@ public class VendorList {
                             String currentStore = row.get(18).trim();
                             if (currentStore.equalsIgnoreCase("003")) {
                                 mapRow.add(j, "Houston Depot");
-                            } else {
+                            }
+                            else {
                                 mapRow.add(j, "Memphis");
                             }
                             break;

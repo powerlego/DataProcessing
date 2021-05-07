@@ -142,15 +142,16 @@ public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
         return executionException;
     }
 
+    public boolean isInterrupted() {
+        return interrupted;
+    }
+
     @Override
     public List<Runnable> shutdownNow() {
         interrupted = true;
         return super.shutdownNow();
     }
 
-    public boolean isInterrupted() {
-        return interrupted;
-    }
 
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
@@ -176,7 +177,6 @@ public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
         }
     }
 
-
     @Override
     protected void terminated() {
         if (executionException != null) {
@@ -189,6 +189,4 @@ public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
         }
         super.terminated();
     }
-
-
 }

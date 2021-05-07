@@ -18,11 +18,11 @@ public class RemoveNonAlphaNum extends Task<List<List<String>>> {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger             logger = LogManager.getLogger();
     /**
      * Local copy of the table to remove the non-alphanumeric characters from
      */
-    private List<List<String>> table;
+    private              List<List<String>> table;
 
     /**
      * Removes the non-alphanumeric characters from the table

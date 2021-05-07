@@ -33,7 +33,6 @@ public class ArrayListTreeMap<K extends Comparable<? super K>, V> extends Abstra
         this.initialListCapacity = initialListCapacity;
     }
 
-
     public ArrayListTreeMap(final MultiValuedMap<? extends K, ? extends V> map) {
         this(DEFAULT_INITIAL_LIST_CAPACITY);
         super.putAll(map);

@@ -30,40 +30,40 @@ public class POROpenAR {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger                 logger    = LogManager.getLogger();
     /**
      * The instance of the FileUtils class
      */
-    private static final FileUtils fileUtils = FileUtils.getInstance();
-    private final        Utils utils = Utils.getInstance();
+    private static final FileUtils              fileUtils = FileUtils.getInstance();
+    private final        Utils                  utils     = Utils.getInstance();
     /**
      * The template mapping task
      */
-    private final        MapTemplate mapTemplate;
+    private final        MapTemplate            mapTemplate;
     /**
      * The server table convert task
      */
-    private final ServerTableConvertTask tableConvertTask;
+    private final        ServerTableConvertTask tableConvertTask;
     /**
      * The first excel writing task
      */
-    private final FileUtils.XlsxTask writeTask1;
+    private final        FileUtils.XlsxTask     writeTask1;
     /**
      * The second excel writing task
      */
-    private final FileUtils.XlsxTask writeTask2;
+    private final        FileUtils.XlsxTask     writeTask2;
     /**
      * The third excel writing task
      */
-    private final FileUtils.XlsxTask writeTask3;
+    private final        FileUtils.XlsxTask     writeTask3;
     /**
      * The list of sub-tasks
      */
-    private final List<Task<?>> tasks;
+    private final        List<Task<?>>          tasks;
     /**
      * The total progress of this task
      */
-    private final DoubleBinding totalProgress;
+    private final        DoubleBinding          totalProgress;
 
     /**
      * The constructor for this class
@@ -82,23 +82,23 @@ public class POROpenAR {
                 "                Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
                 "                Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
                 "                CustomerFile.Terms,\n" +
-                        "                Transactions.STR\n" +
-                        "FROM Transactions\n" +
-                        "         LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
-                        "         LEFT OUTER JOIN Salesman Salesman_Cntr ON Transactions.Salesman = Salesman_Cntr.Number\n" +
-                        "         LEFT OUTER JOIN CustomerJobSite ON Transactions.JobSite = CustomerJobSite.Number\n" +
-                        "         LEFT OUTER JOIN TransactionType ON Transactions.TransactionType = TransactionType.TypeNumber\n" +
-                        "         LEFT OUTER JOIN TransactionOperation ON Transactions.Operation = TransactionOperation.OperationNumber\n" +
-                        "         LEFT OUTER JOIN ParameterFile ON Transactions.STR = ParameterFile.Store\n" +
-                        "         LEFT OUTER JOIN Salesman Salesman_jobsite ON CustomerJobSite.Salesman = Salesman_jobsite.Number\n" +
-                        "         LEFT OUTER JOIN CustomerType ON CustomerFile.Type = CustomerType.Type\n" +
-                        "         LEFT OUTER JOIN Salesman Salesman_customer ON CustomerFile.Salesman = Salesman_customer.Number\n" +
-                        "WHERE (Transactions.TOTL <> Transactions.PAID OR Transactions.DEPP <> 0)\n" +
-                        "  AND Transactions.Archived = 0\n" +
-                        "  AND Transactions.PYMT <> N'T'\n" +
-                        "  AND Transactions.STAT NOT LIKE 'R%'\n" +
-                        "  AND Transactions.STAT NOT LIKE 'Q%'\n" +
-                        "  AND Transactions.STAT NOT LIKE 'O%'"
+                "                Transactions.STR\n" +
+                "FROM Transactions\n" +
+                "         LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
+                "         LEFT OUTER JOIN Salesman Salesman_Cntr ON Transactions.Salesman = Salesman_Cntr.Number\n" +
+                "         LEFT OUTER JOIN CustomerJobSite ON Transactions.JobSite = CustomerJobSite.Number\n" +
+                "         LEFT OUTER JOIN TransactionType ON Transactions.TransactionType = TransactionType.TypeNumber\n" +
+                "         LEFT OUTER JOIN TransactionOperation ON Transactions.Operation = TransactionOperation.OperationNumber\n" +
+                "         LEFT OUTER JOIN ParameterFile ON Transactions.STR = ParameterFile.Store\n" +
+                "         LEFT OUTER JOIN Salesman Salesman_jobsite ON CustomerJobSite.Salesman = Salesman_jobsite.Number\n" +
+                "         LEFT OUTER JOIN CustomerType ON CustomerFile.Type = CustomerType.Type\n" +
+                "         LEFT OUTER JOIN Salesman Salesman_customer ON CustomerFile.Salesman = Salesman_customer.Number\n" +
+                "WHERE (Transactions.TOTL <> Transactions.PAID OR Transactions.DEPP <> 0)\n" +
+                "  AND Transactions.Archived = 0\n" +
+                "  AND Transactions.PYMT <> N'T'\n" +
+                "  AND Transactions.STAT NOT LIKE 'R%'\n" +
+                "  AND Transactions.STAT NOT LIKE 'Q%'\n" +
+                "  AND Transactions.STAT NOT LIKE 'O%'"
         );
         mapTemplate = new POROpenAR.MapTemplate();
         writeTask1 = fileUtils.writeXlsxTask(storeLocation.resolve("Open AR Template-Mahaffey Tent & Awning.xlsx"));
@@ -110,17 +110,17 @@ public class POROpenAR {
         tasks.add(writeTask2);
         tasks.add(writeTask3);
         totalProgress = Bindings.createDoubleBinding(() -> (
-                        Math.max(0, tableConvertTask.getProgress()) +
-                                Math.max(0, mapTemplate.getProgress()) +
-                                Math.max(0, writeTask1.getProgress()) +
-                                Math.max(0, writeTask2.getProgress()) +
-                                Math.max(0, writeTask3.getProgress())
-                ) / 5,
-                tableConvertTask.progressProperty(),
-                mapTemplate.progressProperty(),
-                writeTask1.progressProperty(),
-                writeTask2.progressProperty(),
-                writeTask3.progressProperty()
+                                                                   Math.max(0, tableConvertTask.getProgress()) +
+                                                                   Math.max(0, mapTemplate.getProgress()) +
+                                                                   Math.max(0, writeTask1.getProgress()) +
+                                                                   Math.max(0, writeTask2.getProgress()) +
+                                                                   Math.max(0, writeTask3.getProgress())
+                                                           ) / 5,
+                                                     tableConvertTask.progressProperty(),
+                                                     mapTemplate.progressProperty(),
+                                                     writeTask1.progressProperty(),
+                                                     writeTask2.progressProperty(),
+                                                     writeTask3.progressProperty()
         );
     }
 
@@ -157,7 +157,6 @@ public class POROpenAR {
             writeTask2.setTable(mapTemplate.getValue().get(1));
             writeTask3.setTable(mapTemplate.getValue().get(2));
             executorService.submit(writeTask1);
-
         });
         writeTask1.setOnSucceeded(event -> {
             executorService.submit(writeTask2);
@@ -181,42 +180,44 @@ public class POROpenAR {
      * Maps the data to the Open AR Template
      */
     private static class MapTemplate extends Task<List<List<List<String>>>> {
+
         /**
          * The instance of the Utils class
          */
-        private static final Utils utils = Utils.getInstance();
+        private static final Utils                    utils       = Utils.getInstance();
         /**
          * The instance of the MapperUtils class
          */
-        private static final MapperUtils mapperUtils = MapperUtils.getInstance();
+        private static final MapperUtils              mapperUtils = MapperUtils.getInstance();
         /**
          * The template associated to this mapping
          */
-        private static final String template = "/templates/Open AR (Invoices) Template_MFG FINAL.xlsx";
+        private static final String                   template
+                                                                  = "/templates/Open AR (Invoices) Template_MFG FINAL.xlsx";
         /**
          * The header of the template
          */
-        private final List<String> header;
+        private final        List<String>             header;
         /**
          * The table that stores the mapped data for store 1
          */
-        private final List<List<String>> mapTable1;
+        private final        List<List<String>>       mapTable1;
         /**
          * The table that stores the mapped data for store 2
          */
-        private final List<List<String>> mapTable2;
+        private final        List<List<String>>       mapTable2;
         /**
          * The table that stores the mapped data for store 3
          */
-        private final List<List<String>> mapTable3;
+        private final        List<List<String>>       mapTable3;
         /**
          * The list of tables for every store listed in POR
          */
-        private final List<List<List<String>>> tables;
+        private final        List<List<List<String>>> tables;
         /**
          * The data to be mapped
          */
-        private List<List<String>> data;
+        private              List<List<String>>       data;
 
         /**
          * The constructor for this inner class
@@ -284,14 +285,14 @@ public class POROpenAR {
                             int days = 0;
                             try {
                                 days = Integer.parseInt(terms);
-                            } catch (NumberFormatException ignored) {
+                            }
+                            catch (NumberFormatException ignored) {
                             }
                             calendar.add(Calendar.DATE, days);
                             dateString = dateFormat.format(calendar.getTime());
                             mapRow.add(j, dateString);
                             break;
                         case 10:
-
                             date = dateFormat.parse(row.get(3).trim());
                             SimpleDateFormat postDate = new SimpleDateFormat("MM/yy");
                             dateString = postDate.format(date);
@@ -328,7 +329,6 @@ public class POROpenAR {
                         mapTable3.add(mapRow);
                         break;
                 }
-
                 utils.sleep(1);
             }
             mapTable1.sort((o1, o2) -> {

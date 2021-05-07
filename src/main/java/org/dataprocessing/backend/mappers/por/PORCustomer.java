@@ -336,7 +336,6 @@ public class PORCustomer {
                                 mapRow.add(j, split[0].trim());
                                 mapRow.add(j + 1, split[1].trim());
                             }
-
                         }
                         break;
                     case 32:
@@ -464,7 +463,6 @@ public class PORCustomer {
                 localProgress += localProgressUpdate;
                 databaseMapProgress.set(localProgress);
             }
-
             mapTable.add(mapRow);
             utils.sleep(1);
         }

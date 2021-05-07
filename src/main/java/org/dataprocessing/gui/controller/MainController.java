@@ -27,20 +27,21 @@ import static io.datafx.controller.flow.container.ContainerAnimations.SWIPE_LEFT
  */
 @ViewController(value = "/fxml/main.fxml", title = "Data Processor")
 public class MainController {
+
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger          logger = LogManager.getLogger();
     @FXMLViewFlowContext
-    private ViewFlowContext context;
+    private              ViewFlowContext context;
     @FXML
-    private StackPane root;
+    private              StackPane       root;
     @FXML
-    private StackPane titleBurgerContainer;
+    private              StackPane       titleBurgerContainer;
     @FXML
-    private JFXHamburger titleBurger;
+    private              JFXHamburger    titleBurger;
     @FXML
-    private JFXDrawer drawer;
+    private              JFXDrawer       drawer;
 
     /**
      * Initializes the main controller
@@ -60,7 +61,8 @@ public class MainController {
         titleBurgerContainer.setOnMouseClicked(e -> {
             if (drawer.isClosed() || drawer.isClosing()) {
                 drawer.open();
-            } else {
+            }
+            else {
                 drawer.close();
             }
         });
@@ -71,8 +73,11 @@ public class MainController {
         context.register("ContentFlow", innerFlow);
         final Duration containerAnimationDuration = Duration.millis(320);
         try {
-            drawer.setContent(flowHandler.start(new ExtendedAnimatedFlowContainer(containerAnimationDuration, SWIPE_LEFT)));
-        } catch (FlowException e) {
+            drawer.setContent(flowHandler.start(new ExtendedAnimatedFlowContainer(containerAnimationDuration,
+                                                                                  SWIPE_LEFT
+            )));
+        }
+        catch (FlowException e) {
             logger.fatal("Flow Exception", e);
             System.exit(-1);
         }
@@ -82,8 +87,10 @@ public class MainController {
         final FlowHandler sideMenuFlowHandler = sideMenuFlow.createHandler(context);
         try {
             drawer.setSidePane(sideMenuFlowHandler.start(new ExtendedAnimatedFlowContainer(containerAnimationDuration,
-                    SWIPE_LEFT)));
-        } catch (FlowException e) {
+                                                                                           SWIPE_LEFT
+            )));
+        }
+        catch (FlowException e) {
             logger.fatal("Flow Exception", e);
             System.exit(-1);
         }

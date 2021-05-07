@@ -16,31 +16,31 @@ public class NavModel {
     /**
      * The instance of this class
      */
-    private static final NavModel instance = new NavModel();
+    private static final NavModel        instance = new NavModel();
     /**
      * The string property of the path of the data to process
      */
-    private final StringProperty filePath1;
+    private final        StringProperty  filePath1;
     /**
      * The string property of the path to store the mapped data
      */
-    private final StringProperty filePath2;
+    private final        StringProperty  filePath2;
     /**
      * The boolean property to specify if the gui is locked
      */
-    private final BooleanProperty locked;
+    private final        BooleanProperty locked;
     /**
      * The string property of the progress bar's text
      */
-    private final StringProperty progressBarText;
+    private final        StringProperty  progressBarText;
     /**
      * The boolean property to specify if the gui is not locked
      */
-    private final BooleanProperty notLocked;
+    private final        BooleanProperty notLocked;
     /**
      * The current task being executed
      */
-    private Task<Void> progress;
+    private              Task<Void>      progress;
 
     /**
      * The constructor for this class
