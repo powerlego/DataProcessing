@@ -385,6 +385,7 @@ public class POROpenSales {
     ) {
         List<String> header = new ArrayList<>();
         header.add("contractId");
+        header.add("mainAssemblyKey");
         header.add("parentKey");
         header.add("itemKey");
         header.add("itemName");
@@ -541,7 +542,7 @@ public class POROpenSales {
                                             }
                                             break;
                                         case 8:
-                                            if (dataTempString.indexOf(row) == 0) {
+                                            if (list.indexOf(row) == 0) {
                                                 mapRow[j] = row.get(28).trim() + "^";
                                             }
                                             else {
@@ -945,7 +946,8 @@ public class POROpenSales {
                                      Subassembly subassembly,
                                      String contractNum,
                                      double qty,
-                                     Map<String, Double> grandTotal
+                                     Map<String, Double> grandTotal,
+                                     String parentKey
         ) {
             for (AssemblyItem assemblyItem : subassembly.getAssemblyItems()) {
                 if (isCancelled()) {
@@ -953,6 +955,7 @@ public class POROpenSales {
                 }
                 List<String> row = new ArrayList<>();
                 row.add(contractNum);
+                row.add(parentKey);
                 row.add(subassembly.getAssemblyKey());
                 row.add(assemblyItem.getItemKey());
                 row.add(assemblyItem.getName());
@@ -961,7 +964,13 @@ public class POROpenSales {
                 breakoutList.put(contractNum, row);
                 if (assemblyItem.isSubassembly()) {
                     Subassembly subassembly1 = kits.get(assemblyItem.getItemKey());
-                    breakoutRecurse(breakoutList, subassembly1, contractNum, qty * assemblyItem.getQty(), grandTotal);
+                    breakoutRecurse(breakoutList,
+                                    subassembly1,
+                                    contractNum,
+                                    qty * assemblyItem.getQty(),
+                                    grandTotal,
+                                    parentKey
+                    );
                 }
                 else {
                     if (grandTotal.containsKey(assemblyItem.getItemKey())) {
@@ -995,7 +1004,7 @@ public class POROpenSales {
             double progress = 0.0;
             updateProgress(progress, 1.0);
             double progressUpdate = 1.0 / data.keySet().size();
-            int headerSize = 6;
+            int headerSize = 7;
             loopBreak:
             for (String key : data.keySet()) {
                 if (isCancelled()) {
@@ -1012,6 +1021,7 @@ public class POROpenSales {
                         Subassembly subassembly = kits.get(itemKey);
                         List<String> row1 = new ArrayList<>();
                         row1.add(key);
+                        row1.add(subassembly.getAssemblyKey());
                         row1.add("");
                         row1.add(subassembly.getAssemblyKey());
                         row1.add(subassembly.getName());
@@ -1022,7 +1032,8 @@ public class POROpenSales {
                                         subassembly,
                                         key,
                                         Double.parseDouble(row.get(22).substring(0, row.get(22).length() - 1)),
-                                        grandTotal
+                                        grandTotal,
+                                        subassembly.getAssemblyKey()
                         );
                     }
                 }
