@@ -36,54 +36,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        /*List<String> params = getParameters().getRaw();
-        if (params.size() != 0) {
-            if (params.get(0).equalsIgnoreCase("debug")) {
-                FXMLLoader loader;
-                Parent root;
-                Scene scene;
-                switch (params.get(1)) {
-                    case "customerMapping":
-                        loader = new FXMLLoader(getClass().getResource("/fxml/debugging.fxml"));
-                        root = loader.load();
-                        scene = new Scene(root);
-                        primaryStage.setScene(scene);
-                        utils.setWindow(primaryStage);
-                        primaryStage.show();
-                    case "sqlDatabase":
-                        Flow flow = new Flow(DebuggingController.class);
-                        DefaultFlowContainer container = new DefaultFlowContainer();
-                        flowContext = new ViewFlowContext();
-                        flowContext.register("Stage", primaryStage);
-                        flow.createHandler(flowContext).start(container);
-                        JFXDecorator decorator = new JFXDecorator(primaryStage, container.getView());
-                        decorator.setCustomMaximize(true);
-                        decorator.setGraphic(new SVGGlyph(""));
-                        primaryStage.setTitle("Data Processing");
-
-                        double width = 800;
-                        double height = 600;
-                        try {
-                            Rectangle2D bounds = Screen.getScreens().get(0).getBounds();
-                            width = bounds.getWidth() / 2.5;
-                            height = bounds.getHeight() / 1.35;
-                        } catch (Exception e) {
-                            logger.fatal("Index out of Bounds", e);
-                            System.exit(-1);
-                        }
-                        scene = new Scene(decorator, width, height);
-                        final ObservableList<String> stylesheets = scene.getStylesheets();
-                        stylesheets.addAll(JFoenixResources.load("/css/jfoenix-fonts.css").toExternalForm(),
-                                JFoenixResources.load("/css/jfoenix-design.css").toExternalForm(),
-                                Main.class.getResource("/css/styling.css").toExternalForm());
-                        primaryStage.setScene(scene);
-                        utils.setWindow(primaryStage);
-                        primaryStage.show();
-                    default:
-                        break;
-                }
-            }
-        } else {*/
         Thread thread = new Thread(() -> {
             try {
                 SVGGlyphLoader.loadGlyphsFont(Main.class.getResourceAsStream("/fonts/icomoon.svg"),
@@ -130,5 +82,4 @@ public class Main extends Application {
         utils.setWindow(primaryStage);
         primaryStage.show();
     }
-    //}
 }
