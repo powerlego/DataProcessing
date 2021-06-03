@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public class FileUtils extends Utils {
 
-    private static final Logger    logger   = LogManager.getLogger();
+    private static final Logger    logger   = LogManager.getLogger(FileUtils.class);
     private static final FileUtils instance = new FileUtils();
 
     public static FileUtils getInstance() {

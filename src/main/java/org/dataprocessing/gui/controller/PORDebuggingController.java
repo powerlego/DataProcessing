@@ -48,7 +48,7 @@ public class PORDebuggingController {
     /**
      * The instance of the logger
      */
-    private static final Logger    logger    = LogManager.getLogger();
+    private static final Logger    logger    = LogManager.getLogger(PORDebuggingController.class);
     /**
      * The instance of the SqlServer class
      */

@@ -48,7 +48,7 @@ public class NavController {
     /**
      * The instance of the logger
      */
-    private static final Logger                  logger          = LogManager.getLogger();
+    private static final Logger                  logger          = LogManager.getLogger(NavController.class);
     /**
      * The instance of the Utils class
      */

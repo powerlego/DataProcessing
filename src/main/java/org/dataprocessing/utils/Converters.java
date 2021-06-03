@@ -17,7 +17,7 @@ public class Converters {
     /**
      * The instance of the logger
      */
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(Converters.class);
 
     /**
      * Converts List&lt;String[]&gt; Table into List&lt;List&lt;String&gt;&gt; Table

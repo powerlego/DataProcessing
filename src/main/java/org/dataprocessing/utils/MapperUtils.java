@@ -9,10 +9,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Nicholas Curl
@@ -20,7 +17,7 @@ import java.util.Map;
 public class MapperUtils extends Utils {
 
 
-    private static final Logger      logger   = LogManager.getLogger();
+    private static final Logger      logger   = LogManager.getLogger(MapperUtils.class);
     private static final MapperUtils instance = new MapperUtils();
 
     public static MapperUtils getInstance() {
@@ -86,7 +83,7 @@ public class MapperUtils extends Utils {
     public List<String> getHeader(String template) {
         List<String> header;
         try {
-            Workbook wb = WorkbookFactory.create(getClass().getResourceAsStream(template));
+            Workbook wb = WorkbookFactory.create(Objects.requireNonNull(getClass().getResourceAsStream(template)));
             header = getHeaderFromFile(wb);
             wb.close();
         }

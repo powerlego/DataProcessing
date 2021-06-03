@@ -49,7 +49,7 @@ public class PorController {
     /**
      * The instance of the logger
      */
-    private static final Logger    logger    = LogManager.getLogger();
+    private static final Logger    logger    = LogManager.getLogger(PorController.class);
     /**
      * The instance of the SqlServer class
      */

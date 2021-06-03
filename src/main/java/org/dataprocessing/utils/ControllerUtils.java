@@ -25,7 +25,7 @@ public class ControllerUtils extends Utils {
     /**
      * The instance of the logger
      */
-    private static final Logger          logger   = LogManager.getLogger();
+    private static final Logger          logger   = LogManager.getLogger(ControllerUtils.class);
     /**
      * The instance of the Utils class
      */

@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class Utils {
 
 
-    private static final Logger           logger     = LogManager.getLogger();
+    private static final Logger           logger     = LogManager.getLogger(Utils.class);
     private static final Utils            instance   = new Utils();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private              Window           window;
@@ -177,15 +177,6 @@ public class Utils {
         }
         catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-        }
-    }
-
-    public <T extends Comparable<? super T>> Comparator<T[]> sortRow(int index, boolean reverse) {
-        if (reverse) {
-            return Comparator.comparing(ts -> ts[index], Comparator.reverseOrder());
-        }
-        else {
-            return Comparator.comparing(ts -> ts[index]);
         }
     }
 }

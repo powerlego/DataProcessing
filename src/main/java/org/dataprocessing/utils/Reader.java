@@ -21,7 +21,7 @@ import java.util.List;
 public class Reader extends Utils {
 
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(Reader.class);
 
     public Reader() {
     }

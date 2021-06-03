@@ -8,8 +8,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/database/SqlServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/database/SqlServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/custom/VendorList.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/custom/VendorList.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/nav/NAVVendor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/nav/NAVVendor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORCustomer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORCustomer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORItemMaster.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORItemMaster.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenAR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenAR.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenPO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenPO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/RemoveDuplicates.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/RemoveDuplicates.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/RemoveNonAlphaNum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/RemoveNonAlphaNum.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/DebuggingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/DebuggingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/NavController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/NavController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PORDebuggingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PORDebuggingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PorController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/SideMenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/SideMenuController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/model/PorModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/model/PorModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Alerts.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Alerts.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/ControllerUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/ControllerUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Converters.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Converters.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/FileUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/FileUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/MapperUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/MapperUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Reader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Reader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/utils/Utils.java" afterDir="false" />
     </list>
     <list id="f8617058-69cc-42af-8bf3-2f8d9d7f275b" name="Revert &quot;Initial commit&quot;" comment="Revert &quot;Initial commit&quot;&#10;&#10;This reverts commit 63715dbe" />
     <option name="SHOW_DIALOG" value="false" />
@@ -117,6 +141,19 @@
     </key>
   </component>
   <component name="RunManager" selected="Maven.Run GUI">
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="DataProcessing-4.0.0.0.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/target/DataProcessing-4.0.0.0.jar" />
       <method v="2" />
@@ -413,7 +450,7 @@
       <workItem from="1622148812779" duration="2000" />
       <workItem from="1622552525443" duration="4173000" />
       <workItem from="1622645666475" duration="9611000" />
-      <workItem from="1622722404560" duration="9431000" />
+      <workItem from="1622722404560" duration="9900000" />
     </task>
     <task id="LOCAL-00001" summary="Updated .gitignore">
       <created>1617638919949</created>
@@ -485,7 +522,14 @@
       <option name="project" value="LOCAL" />
       <updated>1622749505174</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Cleaned up code">
+      <created>1622751955862</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1622751955862</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

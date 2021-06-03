@@ -30,7 +30,7 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
     /**
      * The instance of the logger
      */
-    private static final Logger    logger = LogManager.getLogger();
+    private static final Logger    logger = LogManager.getLogger(ServerTableConvertTask.class);
     /**
      * The instance of the Utils class
      */

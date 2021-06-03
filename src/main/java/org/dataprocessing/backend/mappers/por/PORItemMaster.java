@@ -26,7 +26,7 @@ public class PORItemMaster {
     /**
      * The instance of the logger
      */
-    private static final Logger                 logger    = LogManager.getLogger();
+    private static final Logger                 logger    = LogManager.getLogger(PORItemMaster.class);
     /**
      * The instance of the FileUtils class
      */

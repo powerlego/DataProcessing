@@ -18,7 +18,7 @@ public class NAVVendor {
     /**
      * The instance of the logger
      */
-    private static final Logger             logger      = LogManager.getLogger();
+    private static final Logger             logger      = LogManager.getLogger(NAVVendor.class);
     /**
      * The instance of the Utils class
      */

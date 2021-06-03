@@ -19,7 +19,7 @@ public class RemoveDuplicates extends Task<List<List<String>>> {
     /**
      * The instance of the logger
      */
-    private static final Logger                   logger = LogManager.getLogger();
+    private static final Logger                   logger = LogManager.getLogger(RemoveDuplicates.class);
     /**
      * The new table without the duplicate data
      */

@@ -23,7 +23,7 @@ public class PorModel {
     /**
      * The instance of the logger
      */
-    private static final Logger          logger   = LogManager.getLogger();
+    private static final Logger          logger   = LogManager.getLogger(PorModel.class);
     /**
      * The instance of this class
      */

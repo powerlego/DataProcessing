@@ -24,7 +24,7 @@ import java.io.IOException;
 
 public class Main extends Application {
 
-    private static final Logger          logger = LogManager.getLogger();
+    private static final Logger          logger = LogManager.getLogger(Main.class);
     private static final Utils           utils  = Utils.getInstance();
     private static final SqlServer       server = SqlServer.getInstance();
     @FXMLViewFlowContext

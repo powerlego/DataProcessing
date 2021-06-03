@@ -30,19 +30,19 @@ import java.util.concurrent.ExecutorService;
  */
 @ViewController(value = "/fxml/debugging.fxml", title = "Data Processor")
 public class DebuggingController {
-    private static final Logger          logger = LogManager.getLogger();
+    private static final Logger          logger = LogManager.getLogger(DebuggingController.class);
     private static final SqlServer       server = SqlServer.getInstance();
     private static final Utils           utils  = Utils.getInstance();
     @FXMLViewFlowContext
     private              ViewFlowContext context;
     @FXML
-    private JFXSpinner progSpin;
+    private              JFXSpinner      progSpin;
     @FXML
-    private Label progress1;
+    private              Label           progress1;
     @FXML
-    private JFXButton process;
+    private              JFXButton       process;
     @FXML
-    private StackPane root;
+    private              StackPane       root;
     private BooleanBinding complete;
 
     @PostConstruct
