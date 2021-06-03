@@ -12,7 +12,6 @@ import org.dataprocessing.utils.Utils;
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
-import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,10 +73,10 @@ public class ServerTableConvertTask extends Task<List<List<?>>> {
         }
         if (!isCancelled()) {
             if (!server.isClosed()) {
-                ResultSet resultSet = server.queryServer(sql);
                 RowSetFactory factory = RowSetProvider.newFactory();
                 CachedRowSet rowSet = factory.createCachedRowSet();
-                rowSet.populate(resultSet);
+                rowSet.setCommand(sql);
+                rowSet.execute(server.getConnection());
                 List<?> list = new ArrayList<>(rowSet.toCollection());
                 double localProgressUpdate = 1.0 / rowSet.size();
                 ResultSetMetaData metaData = rowSet.getMetaData();

@@ -8,7 +8,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_api_2_14_12.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_core_2_14_12.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/Open Sales Order Template_MFG FINAL.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/Open Sales Order Template_MFG FINAL.xlsx" afterDir="false" />
     </list>
     <list id="f8617058-69cc-42af-8bf3-2f8d9d7f275b" name="Revert &quot;Initial commit&quot;" comment="Revert &quot;Initial commit&quot;&#10;&#10;This reverts commit 63715dbe" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,6 +37,7 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RESET_MODE" value="HARD" />
   </component>
@@ -395,7 +403,23 @@
       <workItem from="1620390303652" duration="11511000" />
       <workItem from="1620417426397" duration="25000" />
       <workItem from="1620675810665" duration="1677000" />
-      <workItem from="1620752129865" duration="6759000" />
+      <workItem from="1620752129865" duration="10520000" />
+      <workItem from="1620822277446" duration="970000" />
+      <workItem from="1620844991869" duration="599000" />
+      <workItem from="1620941005722" duration="1251000" />
+      <workItem from="1621346069524" duration="354000" />
+      <workItem from="1621427403428" duration="19000" />
+      <workItem from="1621427817214" duration="2242000" />
+      <workItem from="1621612249186" duration="90000" />
+      <workItem from="1621612392540" duration="1442000" />
+      <workItem from="1621875245203" duration="598000" />
+      <workItem from="1621893122631" duration="362000" />
+      <workItem from="1621967172354" duration="846000" />
+      <workItem from="1622146069446" duration="503000" />
+      <workItem from="1622148812779" duration="2000" />
+      <workItem from="1622552525443" duration="4173000" />
+      <workItem from="1622645666475" duration="9611000" />
+      <workItem from="1622722404560" duration="7285000" />
     </task>
     <task id="LOCAL-00001" summary="Updated .gitignore">
       <created>1617638919949</created>
@@ -439,7 +463,21 @@
       <option name="project" value="LOCAL" />
       <updated>1620759577366</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Cleaned up code">
+      <created>1620760073725</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1620760073725</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Revert &quot;Delete Inventory Item Template1.xlsx&quot;&#10;&#10;This reverts commit 6a2bad6b">
+      <created>1620760162107</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1620760162107</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -481,9 +519,10 @@
     <MESSAGE value="fixed everything" />
     <MESSAGE value="Added Fixes necessary for TVG" />
     <MESSAGE value="Added tasks for breaking out subassemblies" />
-    <MESSAGE value="Cleaned up code" />
     <MESSAGE value="Fixed an error in checking for first row of sales order" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed an error in checking for first row of sales order" />
+    <MESSAGE value="Cleaned up code" />
+    <MESSAGE value="Revert &quot;Delete Inventory Item Template1.xlsx&quot;&#10;&#10;This reverts commit 6a2bad6b" />
+    <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;Delete Inventory Item Template1.xlsx&quot;&#10;&#10;This reverts commit 6a2bad6b" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
@@ -510,6 +549,11 @@
           <properties class="java.lang.NullPointerException" package="java.lang" />
           <option name="timeStamp" value="80" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java</url>
+          <line>79</line>
+          <option name="timeStamp" value="82" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="java-exception">
@@ -530,6 +574,7 @@
         <watch expression="((Row) list.get(0)).getOrigRow()" language="JAVA" custom="com.sun.rowset.internal.Row" />
         <watch expression="rowSet.getMetaData().getColumnName(3)" language="JAVA" />
         <watch expression="tables.get(1)" />
+        <watch expression="rowSet.toCollection()" language="JAVA" />
       </configuration>
     </watches-manager>
   </component>

@@ -22,6 +22,7 @@ import org.dataprocessing.utils.MapperUtils;
 import org.dataprocessing.utils.Utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -59,28 +60,29 @@ public class POROpenSales {
     /**
      * The second excel writing task
      */
-    private final        XlsxTask               writeTask2;
+    private final XlsxTask              writeTask2;
     /**
      * The third excel writing task
      */
-    private final        XlsxTask               writeTask3;
-    private final        XlsxTaskMultiSheet     writeTask4;
-    private final        XlsxTaskMultiSheet     writeTask5;
-    private final        XlsxTaskMultiSheet     writeTask6;
+    private final XlsxTask              writeTask3;
+    private final XlsxTaskMultiSheet    writeTask4;
+    private final XlsxTaskMultiSheet    writeTask5;
+    private final XlsxTaskMultiSheet    writeTask6;
+    private final XlsxTask              writeTask7;
     /**
      * The list of sub-tasks
      */
-    private final        List<Task<?>>          tasks;
-    private final        GroupSalesOrders       groupSalesOrders;
-    private final        FilterSubassemblies    filterSubassemblies;
-    private final        BreakoutSubassemblies  breakoutSubassemblies;
-    private final        GroupSalesOrders       groupSalesOrders1;
-    private final        FilterSubassemblies    filterSubassemblies1;
-    private final        BreakoutSubassemblies  breakoutSubassemblies1;
-    private final        GroupSalesOrders       groupSalesOrders2;
-    private final        FilterSubassemblies    filterSubassemblies2;
-    private final        BreakoutSubassemblies  breakoutSubassemblies2;
-    private final        GroupSalesOrders       groupData;
+    private final List<Task<?>>         tasks;
+    private final GroupSalesOrders      groupSalesOrders;
+    private final FilterSubassemblies   filterSubassemblies;
+    private final BreakoutSubassemblies breakoutSubassemblies;
+    private final GroupSalesOrders      groupSalesOrders1;
+    private final FilterSubassemblies   filterSubassemblies1;
+    private final BreakoutSubassemblies breakoutSubassemblies1;
+    private final GroupSalesOrders      groupSalesOrders2;
+    private final FilterSubassemblies   filterSubassemblies2;
+    private final BreakoutSubassemblies breakoutSubassemblies2;
+    private final GroupSalesOrders      groupData;
     /**
      * The total progress of this task
      */
@@ -101,7 +103,7 @@ public class POROpenSales {
                 "       CustomerFile.NAME             as [Customer Name],\n" +
                 "       Transactions.DATE             AS [Transaction Date],\n" +
                 "       Salesman.Name                 AS [Transaction Sales Rep],\n" +
-                "       ItemFile.[KEY]         as [Item No],\n" +
+                "       ItemFile.[KEY]                as [Item No],\n" +
                 "       ItemFile.Name                 as [Item Name],\n" +
                 "       TransactionItems.QTY,\n" +
                 "       TransactionItems.PRIC         as [Sales Price],\n" +
@@ -133,48 +135,56 @@ public class POROpenSales {
                 "       Transactions.ReviewBilling,\n" +
                 "       TaxTable.TaxRent1,\n" +
                 "       Transactions.PickupDate,\n" +
-                "       Transactions.STR\n" +
+                "       Transactions.STR,\n" +
+                "       ItemCategory.Name,\n" +
+                "       isnull(ServiceMap.ServiceName, '') as ServiceName,\n" +
+                "       isnull(ServiceMap.ServiceID,0) as ServiceID\n" +
                 "FROM TransactionItems\n" +
                 "         LEFT JOIN Transactions on Transactions.CNTR = TransactionItems.CNTR\n" +
                 "         LEFT JOIN ItemFile on TransactionItems.ITEM = ItemFile.NUM\n" +
                 "         LEFT JOIN CustomerFile on Transactions.CUSN = CustomerFile.CNUM\n" +
                 "         LEFT JOIN ItemDepartment on ItemFile.Department = ItemDepartment.Department\n" +
-                "         INNER JOIN (SELECT DISTINCT CustomerFile.NAME        as Customer_Name,\n" +
-                "                                     Transactions.TOTL        as Transaction_Total,\n" +
-                "                                     Transactions.STAT        as Transaction_Status,\n" +
-                "                                     Transactions.CNTR        as Transaction_Contract,\n" +
-                "                                     Transactions.PAID,\n" +
-                "                                     Transactions.CLDT        as Transaction_Close_Date,\n" +
-                "                                     Salesman_Cntr.Name       as Contract_Sales_Rep_Name,\n" +
-                "                                     TransactionType.TypeName as Transaction_Type,\n" +
-                "                                     Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
-                "                                     Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
-                "                                     Transactions.DEPP        as Deprication,\n" +
-                "                                     CustomerFile.CurrentBalance,\n" +
-                "                                     CustomerFile.Terms\n" +
-                "                     FROM Transactions\n" +
-                "                              LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
-                "                              LEFT OUTER JOIN Salesman Salesman_Cntr ON Transactions.Salesman = Salesman_Cntr.Number\n" +
-                "                              LEFT OUTER JOIN CustomerJobSite ON Transactions.JobSite = CustomerJobSite.Number\n" +
-                "                              LEFT OUTER JOIN TransactionType\n" +
-                "                                              ON Transactions.TransactionType = TransactionType.TypeNumber\n" +
-                "                              LEFT OUTER JOIN TransactionOperation\n" +
-                "                                              ON Transactions.Operation = TransactionOperation.OperationNumber\n" +
-                "                              LEFT OUTER JOIN ParameterFile ON Transactions.STR = ParameterFile.Store\n" +
-                "                              LEFT OUTER JOIN Salesman Salesman_jobsite\n" +
-                "                                              ON CustomerJobSite.Salesman = Salesman_jobsite.Number\n" +
-                "                              LEFT OUTER JOIN CustomerType ON CustomerFile.Type = CustomerType.Type\n" +
-                "                              LEFT OUTER JOIN Salesman Salesman_customer\n" +
-                "                                              ON CustomerFile.Salesman = Salesman_customer.Number\n" +
-                "                     WHERE (Transactions.TOTL <> Transactions.PAID OR Transactions.DEPP <> 0)\n" +
-                "                       AND Transactions.Archived = 0\n" +
-                "                       AND Transactions.PYMT <> N'T'\n" +
-                "                       AND Transactions.STAT NOT LIKE 'R%'\n" +
-                "                       AND Transactions.STAT NOT LIKE 'Q%'\n" +
-                "                       AND Transactions.STAT NOT LIKE 'C%') Q ON Q.Transaction_Contract = TransactionItems.CNTR\n" +
+                "         INNER JOIN (\n" +
+                "    SELECT DISTINCT CustomerFile.NAME        as Customer_Name,\n" +
+                "                    Transactions.TOTL        as Transaction_Total,\n" +
+                "                    Transactions.STAT        as Transaction_Status,\n" +
+                "                    Transactions.CNTR        as Transaction_Contract,\n" +
+                "                    Transactions.PAID,\n" +
+                "                    Transactions.CLDT        as Transaction_Close_Date,\n" +
+                "                    Salesman_Cntr.Name       as Contract_Sales_Rep_Name,\n" +
+                "                    TransactionType.TypeName as Transaction_Type,\n" +
+                "                    Salesman_customer.Name   as Customer_Sales_Rep_Name,\n" +
+                "                    Salesman_jobsite.Name    as Jobsite_Sales_Rep_Name,\n" +
+                "                    Transactions.DEPP        as Deprication,\n" +
+                "                    CustomerFile.CurrentBalance,\n" +
+                "                    CustomerFile.Terms\n" +
+                "    FROM Transactions\n" +
+                "             LEFT OUTER JOIN CustomerFile ON Transactions.CUSN = CustomerFile.CNUM\n" +
+                "             LEFT OUTER JOIN Salesman Salesman_Cntr ON Transactions.Salesman = Salesman_Cntr.Number\n" +
+                "             LEFT OUTER JOIN CustomerJobSite ON Transactions.JobSite = CustomerJobSite.Number\n" +
+                "             LEFT OUTER JOIN TransactionType\n" +
+                "                             ON Transactions.TransactionType = TransactionType.TypeNumber\n" +
+                "             LEFT OUTER JOIN TransactionOperation\n" +
+                "                             ON Transactions.Operation = TransactionOperation.OperationNumber\n" +
+                "             LEFT OUTER JOIN ParameterFile ON Transactions.STR = ParameterFile.Store\n" +
+                "             LEFT OUTER JOIN Salesman Salesman_jobsite\n" +
+                "                             ON CustomerJobSite.Salesman = Salesman_jobsite.Number\n" +
+                "             LEFT OUTER JOIN CustomerType ON CustomerFile.Type = CustomerType.Type\n" +
+                "             LEFT OUTER JOIN Salesman Salesman_customer\n" +
+                "                             ON CustomerFile.Salesman = Salesman_customer.Number\n" +
+                "    WHERE (Transactions.TOTL <> Transactions.PAID OR Transactions.DEPP <> 0)\n" +
+                "      AND Transactions.Archived = 0\n" +
+                "      AND Transactions.PYMT <> N'T'\n" +
+                "      AND Transactions.STAT NOT LIKE 'R%'\n" +
+                "      AND Transactions.STAT NOT LIKE 'Q%'\n" +
+                "      AND Transactions.STAT NOT LIKE 'C%'\n" +
+                ") Q ON Q.Transaction_Contract = TransactionItems.CNTR\n" +
                 "         LEFT JOIN Salesman on Transactions.Salesman = Salesman.Number\n" +
                 "         LEFT JOIN TransactionType on Transactions.TransactionType = TransactionType.TypeNumber\n" +
-                "         LEFT JOIN TaxTable on Transactions.TaxCode = TaxTable.TaxCode"
+                "         LEFT JOIN TaxTable on Transactions.TaxCode = TaxTable.TaxCode\n" +
+                "         LEFT JOIN ItemCategory on ItemFile.Category = ItemCategory.Category\n" +
+                "         left join ServiceMap\n" +
+                "                   on ItemFile.Category = ServiceMap.ItemCatID and ItemFile.Department = ServiceMap.ItemDeptID"
         );
         groupData = new GroupSalesOrders();
         kitMapper = new KitMapper();
@@ -188,6 +198,7 @@ public class POROpenSales {
                 "Open Sales Template-Filtered Mahaffey USA.xlsx"));
         writeTask6 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
                 "Open Sales Template-Filtered Mahaffey USA-Houston.xlsx"));
+        writeTask7 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-All.xlsx"));
         groupSalesOrders = new GroupSalesOrders();
         filterSubassemblies = new FilterSubassemblies();
         breakoutSubassemblies = new BreakoutSubassemblies();
@@ -216,6 +227,7 @@ public class POROpenSales {
         tasks.add(writeTask4);
         tasks.add(writeTask5);
         tasks.add(writeTask6);
+        tasks.add(writeTask7);
         totalProgress = Bindings.createDoubleBinding(() -> (
                                                                    Math.max(0, tableConvertTask.getProgress()) +
                                                                    Math.max(0, groupData.getProgress()) +
@@ -235,8 +247,9 @@ public class POROpenSales {
                                                                    Math.max(0, writeTask3.getProgress()) +
                                                                    Math.max(0, writeTask4.getProgress()) +
                                                                    Math.max(0, writeTask5.getProgress()) +
-                                                                   Math.max(0, writeTask6.getProgress())
-                                                           ) / 19,
+                                                                   Math.max(0, writeTask6.getProgress()) +
+                                                                   Math.max(0, writeTask7.getProgress())
+                                                           ) / 20,
                                                      tableConvertTask.progressProperty(),
                                                      groupData.progressProperty(),
                                                      mapTemplate.progressProperty(),
@@ -255,7 +268,8 @@ public class POROpenSales {
                                                      writeTask3.progressProperty(),
                                                      writeTask4.progressProperty(),
                                                      writeTask5.progressProperty(),
-                                                     writeTask6.progressProperty()
+                                                     writeTask6.progressProperty(),
+                                                     writeTask7.progressProperty()
         );
     }
 
@@ -283,16 +297,26 @@ public class POROpenSales {
     public void map(ExecutorService executorService) {
         kitMapping.setOnSucceeded(event -> {
             tableConvertTask.getValue().remove(0);
-            List<List<?>> dataTemp = tableConvertTask.getValue().parallelStream()
+            List<List<?>> dataTemp = tableConvertTask.getValue()
+                                                     .parallelStream()
                                                      .sorted(Comparator.comparing((List<?> o) -> (String) o.get(0))
-                                                                       .thenComparing((List<?> o) -> (BigDecimal) o.get(
-                                                                               7),
-                                                                                      Comparator.reverseOrder()
-                                                                       )
+                                                                       .thenComparing((List<?> o) -> {
+                                                                           if ((Double) o.get(6) == 0) {
+                                                                               return (BigDecimal) o.get(7);
+                                                                           }
+                                                                           else {
+                                                                               return ((BigDecimal) o.get(7)).divide(
+                                                                                       BigDecimal.valueOf((Double) o.get(
+                                                                                               6)),
+                                                                                       RoundingMode.HALF_UP
+                                                                               );
+                                                                           }
+                                                                       }, Comparator.reverseOrder())
                                                                        .thenComparing((List<?> o) -> (String) o.get(4)))
                                                      .collect(Collectors.toList());
             groupData.setHasHeader(false);
-            List<List<String>> dataTempString = utils.convertToTableString(dataTemp);
+            List<List<String>> dataTempString
+                    = utils.convertToTableString(dataTemp);
             groupData.setData(dataTempString);
             executorService.submit(groupData);
         });
@@ -304,6 +328,7 @@ public class POROpenSales {
             writeTask1.setTable(mapTemplate.getValue().get(0));
             writeTask2.setTable(mapTemplate.getValue().get(1));
             writeTask3.setTable(mapTemplate.getValue().get(2));
+            writeTask7.setTable(mapTemplate.getValue().get(3));
             groupSalesOrders.setData(mapTemplate.getValue().get(0));
             groupSalesOrders1.setData(mapTemplate.getValue().get(1));
             groupSalesOrders2.setData(mapTemplate.getValue().get(2));
@@ -321,9 +346,10 @@ public class POROpenSales {
             executorService.submit(breakoutSubassemblies);
         });
         breakoutSubassemblies.setOnSucceeded(event -> {
-            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies.getValue()
-                                                                                                          .values()),
-                                                                       0
+            List<List<String>> table
+                    = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies.getValue()
+                                                                                         .values()),
+                                                      0
             );
             table.add(0, mapTemplate.getHeader());
             List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies.getValue().values());
@@ -342,9 +368,10 @@ public class POROpenSales {
             executorService.submit(breakoutSubassemblies1);
         });
         breakoutSubassemblies1.setOnSucceeded(event -> {
-            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies1.getValue()
-                                                                                                           .values()),
-                                                                       0
+            List<List<String>> table
+                    = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies1.getValue()
+                                                                                          .values()),
+                                                      0
             );
             table.add(0, mapTemplate.getHeader());
             List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies1.getValue().values());
@@ -364,16 +391,18 @@ public class POROpenSales {
             executorService.submit(breakoutSubassemblies2);
         });
         breakoutSubassemblies2.setOnSucceeded(event -> {
-            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies2.getValue()
-                                                                                                           .values()),
-                                                                       0
+            List<List<String>> table
+                    = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies2.getValue()
+                                                                                          .values()),
+                                                      0
             );
             table.add(0, mapTemplate.getHeader());
             List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies2.getValue().values());
             writeTask6.setSheets(addBreakoutHeader(table, breakoutTable));
             executorService.submit(writeTask6);
         });
-        writeTask6.setOnSucceeded(event -> totalProgress.add(0.0001));
+        writeTask6.setOnSucceeded(event -> executorService.submit(writeTask7));
+        writeTask7.setOnSucceeded(event -> totalProgress.add(0.0001));
         writeTask1.setOnSucceeded(event -> executorService.submit(writeTask2));
         writeTask2.setOnSucceeded(event -> executorService.submit(writeTask3));
         executorService.submit(tableConvertTask);
@@ -454,6 +483,7 @@ public class POROpenSales {
          * The table that stores the mapped data for store 3
          */
         private final        List<List<String>>                   mapTable3;
+        private final        List<List<String>>                   mapTableAll;
         /**
          * The list of tables for every store listed in POR
          */
@@ -471,6 +501,7 @@ public class POROpenSales {
             mapTable1 = mapperUtils.createMapTable(template);
             mapTable2 = mapperUtils.createMapTable(template);
             mapTable3 = mapperUtils.createMapTable(template);
+            mapTableAll = mapperUtils.createMapTable(template);
             corrections = mapperUtils.getCorrections(correctionsFile);
             tables = new ArrayList<>();
         }
@@ -487,6 +518,7 @@ public class POROpenSales {
             List<List<String>> mapTable1Temp = Collections.synchronizedList(new ArrayList<>());
             List<List<String>> mapTable2Temp = Collections.synchronizedList(new ArrayList<>());
             List<List<String>> mapTable3Temp = Collections.synchronizedList(new ArrayList<>());
+            List<List<String>> mapTableAllTemp = Collections.synchronizedList(new ArrayList<>());
             AtomicReference<Double> progress = new AtomicReference<>(0.0);
             updateProgress(0, 1.0);
             double progressUpdate = 1.0 / data.size() / header.size();
@@ -507,7 +539,6 @@ public class POROpenSales {
                                 }
                                 List<String> row = dataTempString.get(i);
                                 String[] mapRow = new String[header.size()];
-                                //List<String> mapRow = new ArrayList<>();
                                 for (int j = 0; j < header.size(); j++) {
                                     if (isCancelled()) {
                                         break loopBreak;
@@ -635,6 +666,7 @@ public class POROpenSales {
                                         case 44:
                                         case 46:
                                         case 56:
+                                        case 77:
                                             break;
                                         case 47:
                                             mapRow[j] = row.get(13).trim();
@@ -673,7 +705,10 @@ public class POROpenSales {
                                                     mapRow[j + 1] = split[1].trim();
                                                 }
                                                 catch (ArrayIndexOutOfBoundsException e) {
-                                                    logger.fatal("Array out of bound for string {}", row.get(21), e);
+                                                    logger.fatal("Array out of bound for string {}",
+                                                                 row.get(21),
+                                                                 e
+                                                    );
                                                     System.exit(1);
                                                 }
                                             }
@@ -731,6 +766,45 @@ public class POROpenSales {
                                         case 75:
                                             mapRow[j] = row.get(31).trim() + "^";
                                             break;
+                                        case 76:
+                                            switch (row.get(4).trim()) {
+                                                case "NOTE":
+                                                    mapRow[j] = "Washing/Repairing - Monthly Billing@";
+                                                    mapRow[j + 1] = "6077#";
+                                                    break;
+                                                case "DMGWVR":
+                                                    mapRow[j] = "Damage Waiver - Monthly Billing@";
+                                                    mapRow[j + 1] = "6076#";
+                                                    break;
+                                                case "ACC-ACCNAT-Lt":
+                                                    mapRow[j] = "Lights - Monthly Billing@";
+                                                    mapRow[j + 1] = "6067#";
+                                                    break;
+                                                case "ACC-ACCNAT-GD":
+                                                    mapRow[j] = "Doors - Monthly Billing@";
+                                                    mapRow[j + 1] = "6066#";
+                                                    break;
+                                                case "ACC-ACCNAT-ShNP":
+                                                    mapRow[j] = "Tent Accessories - Monthly Billing@";
+                                                    mapRow[j + 1] = "6070#";
+                                                    break;
+                                                case "FLRSUB":
+                                                    mapRow[j] = "FLRSUB@";
+                                                    mapRow[j + 1] = "9433#";
+                                                    break;
+                                                case "TRASUB":
+                                                    mapRow[j] = "TRASUB@";
+                                                    mapRow[j + 1] = "8694#";
+                                                    break;
+                                                default:
+                                                    mapRow[j] = row.get(38).trim() + "@";
+                                                    mapRow[j + 1] = row.get(39).trim() + "#";
+                                                    break;
+                                            }
+                                            break;
+                                        case 78:
+                                            mapRow[j] = row.get(37).trim() + "@";
+                                            break;
                                         default:
                                             mapRow[j] = "";
                                             break;
@@ -749,6 +823,7 @@ public class POROpenSales {
                                         mapTable3Temp.add(new ArrayList<>(Arrays.asList(mapRow)));
                                         break;
                                 }
+                                mapTableAllTemp.add(new ArrayList<>(Arrays.asList(mapRow)));
                                 utils.sleep(1);
                             }
 
@@ -763,9 +838,11 @@ public class POROpenSales {
             mapTable1.addAll(utils.parallelSortListAscending(mapTable1Temp, 0));
             mapTable2.addAll(utils.parallelSortListAscending(mapTable2Temp, 0));
             mapTable3.addAll(utils.parallelSortListAscending(mapTable3Temp, 0));
+            mapTableAll.addAll(utils.parallelSortListAscending(mapTableAllTemp, 0));
             tables.add(mapTable1);
             tables.add(mapTable2);
             tables.add(mapTable3);
+            tables.add(mapTableAll);
             return tables;
         }
 
