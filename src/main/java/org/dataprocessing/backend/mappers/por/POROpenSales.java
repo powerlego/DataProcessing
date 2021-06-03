@@ -8,7 +8,6 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dataprocessing.backend.database.SqlServer;
 import org.dataprocessing.backend.objects.Subassembly;
 import org.dataprocessing.backend.objects.Subassembly.AssemblyItem;
 import org.dataprocessing.backend.tasks.KitMapper;
@@ -60,29 +59,29 @@ public class POROpenSales {
     /**
      * The second excel writing task
      */
-    private final XlsxTask              writeTask2;
+    private final        XlsxTask               writeTask2;
     /**
      * The third excel writing task
      */
-    private final XlsxTask              writeTask3;
-    private final XlsxTaskMultiSheet    writeTask4;
-    private final XlsxTaskMultiSheet    writeTask5;
-    private final XlsxTaskMultiSheet    writeTask6;
-    private final XlsxTask              writeTask7;
+    private final        XlsxTask               writeTask3;
+    private final        XlsxTaskMultiSheet     writeTask4;
+    private final        XlsxTaskMultiSheet     writeTask5;
+    private final        XlsxTaskMultiSheet     writeTask6;
+    private final        XlsxTask               writeTask7;
     /**
      * The list of sub-tasks
      */
-    private final List<Task<?>>         tasks;
-    private final GroupSalesOrders      groupSalesOrders;
-    private final FilterSubassemblies   filterSubassemblies;
-    private final BreakoutSubassemblies breakoutSubassemblies;
-    private final GroupSalesOrders      groupSalesOrders1;
-    private final FilterSubassemblies   filterSubassemblies1;
-    private final BreakoutSubassemblies breakoutSubassemblies1;
-    private final GroupSalesOrders      groupSalesOrders2;
-    private final FilterSubassemblies   filterSubassemblies2;
-    private final BreakoutSubassemblies breakoutSubassemblies2;
-    private final GroupSalesOrders      groupData;
+    private final        List<Task<?>>          tasks;
+    private final        GroupSalesOrders       groupSalesOrders;
+    private final        FilterSubassemblies    filterSubassemblies;
+    private final        BreakoutSubassemblies  breakoutSubassemblies;
+    private final        GroupSalesOrders       groupSalesOrders1;
+    private final        FilterSubassemblies    filterSubassemblies1;
+    private final        BreakoutSubassemblies  breakoutSubassemblies1;
+    private final        GroupSalesOrders       groupSalesOrders2;
+    private final        FilterSubassemblies    filterSubassemblies2;
+    private final        BreakoutSubassemblies  breakoutSubassemblies2;
+    private final        GroupSalesOrders       groupData;
     /**
      * The total progress of this task
      */
@@ -228,27 +227,26 @@ public class POROpenSales {
         tasks.add(writeTask5);
         tasks.add(writeTask6);
         tasks.add(writeTask7);
-        totalProgress = Bindings.createDoubleBinding(() -> (
-                                                                   Math.max(0, tableConvertTask.getProgress()) +
-                                                                   Math.max(0, groupData.getProgress()) +
-                                                                   Math.max(0, mapTemplate.getProgress()) +
-                                                                   Math.max(0, kitMapper.getTotalProgress()) +
-                                                                   Math.max(0, groupSalesOrders.getProgress()) +
-                                                                   Math.max(0, filterSubassemblies.getProgress()) +
-                                                                   Math.max(0, breakoutSubassemblies.getProgress()) +
-                                                                   Math.max(0, groupSalesOrders1.getProgress()) +
-                                                                   Math.max(0, filterSubassemblies1.getProgress()) +
-                                                                   Math.max(0, breakoutSubassemblies1.getProgress()) +
-                                                                   Math.max(0, groupSalesOrders2.getProgress()) +
-                                                                   Math.max(0, filterSubassemblies2.getProgress()) +
-                                                                   Math.max(0, breakoutSubassemblies2.getProgress()) +
-                                                                   Math.max(0, writeTask1.getProgress()) +
-                                                                   Math.max(0, writeTask2.getProgress()) +
-                                                                   Math.max(0, writeTask3.getProgress()) +
-                                                                   Math.max(0, writeTask4.getProgress()) +
-                                                                   Math.max(0, writeTask5.getProgress()) +
-                                                                   Math.max(0, writeTask6.getProgress()) +
-                                                                   Math.max(0, writeTask7.getProgress())
+        totalProgress = Bindings.createDoubleBinding(() -> (Math.max(0, tableConvertTask.getProgress()) +
+                                                            Math.max(0, groupData.getProgress()) +
+                                                            Math.max(0, mapTemplate.getProgress()) +
+                                                            Math.max(0, kitMapper.getTotalProgress()) +
+                                                            Math.max(0, groupSalesOrders.getProgress()) +
+                                                            Math.max(0, filterSubassemblies.getProgress()) +
+                                                            Math.max(0, breakoutSubassemblies.getProgress()) +
+                                                            Math.max(0, groupSalesOrders1.getProgress()) +
+                                                            Math.max(0, filterSubassemblies1.getProgress()) +
+                                                            Math.max(0, breakoutSubassemblies1.getProgress()) +
+                                                            Math.max(0, groupSalesOrders2.getProgress()) +
+                                                            Math.max(0, filterSubassemblies2.getProgress()) +
+                                                            Math.max(0, breakoutSubassemblies2.getProgress()) +
+                                                            Math.max(0, writeTask1.getProgress()) +
+                                                            Math.max(0, writeTask2.getProgress()) +
+                                                            Math.max(0, writeTask3.getProgress()) +
+                                                            Math.max(0, writeTask4.getProgress()) +
+                                                            Math.max(0, writeTask5.getProgress()) +
+                                                            Math.max(0, writeTask6.getProgress()) +
+                                                            Math.max(0, writeTask7.getProgress())
                                                            ) / 20,
                                                      tableConvertTask.progressProperty(),
                                                      groupData.progressProperty(),
@@ -315,8 +313,7 @@ public class POROpenSales {
                                                                        .thenComparing((List<?> o) -> (String) o.get(4)))
                                                      .collect(Collectors.toList());
             groupData.setHasHeader(false);
-            List<List<String>> dataTempString
-                    = utils.convertToTableString(dataTemp);
+            List<List<String>> dataTempString = utils.convertToTableString(dataTemp);
             groupData.setData(dataTempString);
             executorService.submit(groupData);
         });
@@ -346,10 +343,9 @@ public class POROpenSales {
             executorService.submit(breakoutSubassemblies);
         });
         breakoutSubassemblies.setOnSucceeded(event -> {
-            List<List<String>> table
-                    = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies.getValue()
-                                                                                         .values()),
-                                                      0
+            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies.getValue()
+                                                                                                          .values()),
+                                                                       0
             );
             table.add(0, mapTemplate.getHeader());
             List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies.getValue().values());
@@ -368,16 +364,14 @@ public class POROpenSales {
             executorService.submit(breakoutSubassemblies1);
         });
         breakoutSubassemblies1.setOnSucceeded(event -> {
-            List<List<String>> table
-                    = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies1.getValue()
-                                                                                          .values()),
-                                                      0
+            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies1.getValue()
+                                                                                                           .values()),
+                                                                       0
             );
             table.add(0, mapTemplate.getHeader());
             List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies1.getValue().values());
             writeTask5.setSheets(addBreakoutHeader(table, breakoutTable));
             executorService.submit(writeTask5);
-
         });
         writeTask5.setOnSucceeded(event -> executorService.submit(groupSalesOrders2));
         groupSalesOrders2.setOnSucceeded(event -> {
@@ -391,10 +385,9 @@ public class POROpenSales {
             executorService.submit(breakoutSubassemblies2);
         });
         breakoutSubassemblies2.setOnSucceeded(event -> {
-            List<List<String>> table
-                    = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies2.getValue()
-                                                                                          .values()),
-                                                      0
+            List<List<String>> table = utils.parallelSortListAscending(new ArrayList<>(filterSubassemblies2.getValue()
+                                                                                                           .values()),
+                                                                       0
             );
             table.add(0, mapTemplate.getHeader());
             List<List<String>> breakoutTable = new ArrayList<>(breakoutSubassemblies2.getValue().values());
@@ -449,10 +442,6 @@ public class POROpenSales {
          * The instance of the MapperUtils class
          */
         private static final MapperUtils                          mapperUtils     = MapperUtils.getInstance();
-        /**
-         * The instance of SqlServer Class
-         */
-        private static final SqlServer                            server          = SqlServer.getInstance();
         /**
          * The template associated with this mapping
          */
@@ -686,13 +675,11 @@ public class POROpenSales {
                                         case 54:
                                             mapRow[j] = row.get(20).trim();
                                             break;
-                                        case 55:
-                                            //Checks to see if the city and state is blank
+                                        case 55:                                            /*Checks to see if the city and state is blank*/
                                             if (utils.isBlankString(row.get(21))) {
                                                 mapRow[j] = "";
                                                 mapRow[j + 1] = "";
-                                            }
-                                            //Checks to see if the city and state has a correction
+                                            }                                            /*Checks to see if the city and state has a correction*/
                                             else if (corrections.containsKey(row.get(21).trim())) {
                                                 split = corrections.get(row.get(21).trim()).split(",");
                                                 mapRow[j] = split[0].trim();
@@ -705,10 +692,7 @@ public class POROpenSales {
                                                     mapRow[j + 1] = split[1].trim();
                                                 }
                                                 catch (ArrayIndexOutOfBoundsException e) {
-                                                    logger.fatal("Array out of bound for string {}",
-                                                                 row.get(21),
-                                                                 e
-                                                    );
+                                                    logger.fatal("Array out of bound for string {}", row.get(21), e);
                                                     System.exit(1);
                                                 }
                                             }
@@ -826,7 +810,6 @@ public class POROpenSales {
                                 mapTableAllTemp.add(new ArrayList<>(Arrays.asList(mapRow)));
                                 utils.sleep(1);
                             }
-
                             return null;
                         });
                     }
@@ -1051,8 +1034,8 @@ public class POROpenSales {
                 }
                 else {
                     if (grandTotal.containsKey(assemblyItem.getItemKey())) {
-                        double total = grandTotal.get(assemblyItem.getItemKey());
-                        total += (qty * assemblyItem.getQty());
+                        double total =
+                                grandTotal.get(assemblyItem.getItemKey()) + (qty * assemblyItem.getQty());
                         grandTotal.put(assemblyItem.getItemKey(), total);
                     }
                     else {

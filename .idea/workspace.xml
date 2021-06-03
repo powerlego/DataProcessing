@@ -8,14 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_api_2_14_12.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_core_2_14_12.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/Open Sales Order Template_MFG FINAL.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/Open Sales Order Template_MFG FINAL.xlsx" afterDir="false" />
     </list>
     <list id="f8617058-69cc-42af-8bf3-2f8d9d7f275b" name="Revert &quot;Initial commit&quot;" comment="Revert &quot;Initial commit&quot;&#10;&#10;This reverts commit 63715dbe" />
     <option name="SHOW_DIALOG" value="false" />
@@ -419,7 +412,7 @@
       <workItem from="1622148812779" duration="2000" />
       <workItem from="1622552525443" duration="4173000" />
       <workItem from="1622645666475" duration="9611000" />
-      <workItem from="1622722404560" duration="7285000" />
+      <workItem from="1622722404560" duration="7660000" />
     </task>
     <task id="LOCAL-00001" summary="Updated .gitignore">
       <created>1617638919949</created>
@@ -477,7 +470,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620760162107</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Added mapping for Product Service Categories">
+      <created>1622749146463</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1622749146463</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -522,7 +522,8 @@
     <MESSAGE value="Fixed an error in checking for first row of sales order" />
     <MESSAGE value="Cleaned up code" />
     <MESSAGE value="Revert &quot;Delete Inventory Item Template1.xlsx&quot;&#10;&#10;This reverts commit 6a2bad6b" />
-    <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;Delete Inventory Item Template1.xlsx&quot;&#10;&#10;This reverts commit 6a2bad6b" />
+    <MESSAGE value="Added mapping for Product Service Categories" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added mapping for Product Service Categories" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
