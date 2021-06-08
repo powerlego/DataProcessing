@@ -752,10 +752,6 @@ public class POROpenSales {
                                             break;
                                         case 76:
                                             switch (row.get(4).trim()) {
-                                                case "NOTE":
-                                                    mapRow[j] = "Washing/Repairing - Monthly Billing@";
-                                                    mapRow[j + 1] = "6077#";
-                                                    break;
                                                 case "DMGWVR":
                                                     mapRow[j] = "Damage Waiver - Monthly Billing@";
                                                     mapRow[j + 1] = "6076#";
@@ -772,13 +768,17 @@ public class POROpenSales {
                                                     mapRow[j] = "Tent Accessories - Monthly Billing@";
                                                     mapRow[j + 1] = "6070#";
                                                     break;
-                                                case "FLRSUB":
-                                                    mapRow[j] = "FLRSUB@";
-                                                    mapRow[j + 1] = "9433#";
+                                                case "ACCSUB":
+                                                    mapRow[j] = "ACCSUB@";
+                                                    mapRow[j + 1] = "9434#";
                                                     break;
-                                                case "TRASUB":
-                                                    mapRow[j] = "TRASUB@";
-                                                    mapRow[j + 1] = "8694#";
+                                                case "SALSUB":
+                                                    mapRow[j] = "SALSUB@";
+                                                    mapRow[j + 1] = "9436#";
+                                                    break;
+                                                case "LAB-010":
+                                                    mapRow[j] = "Hotel/Per Diem - Monthly Billing@";
+                                                    mapRow[j + 1] = "6073#";
                                                     break;
                                                 default:
                                                     mapRow[j] = row.get(38).trim() + "@";
