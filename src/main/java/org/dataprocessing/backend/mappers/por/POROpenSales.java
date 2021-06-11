@@ -8,6 +8,7 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dataprocessing.backend.objects.SalesOrder;
 import org.dataprocessing.backend.objects.Subassembly;
 import org.dataprocessing.backend.objects.Subassembly.AssemblyItem;
 import org.dataprocessing.backend.tasks.KitMapper;
@@ -71,23 +72,24 @@ public class POROpenSales {
     /**
      * The list of sub-tasks
      */
-    private final        List<Task<?>>          tasks;
-    private final        GroupSalesOrders       groupSalesOrders;
-    private final        FilterSubassemblies    filterSubassemblies;
-    private final        BreakoutSubassemblies  breakoutSubassemblies;
-    private final        GroupSalesOrders       groupSalesOrders1;
-    private final        FilterSubassemblies    filterSubassemblies1;
-    private final        BreakoutSubassemblies  breakoutSubassemblies1;
-    private final        GroupSalesOrders       groupSalesOrders2;
-    private final        FilterSubassemblies    filterSubassemblies2;
-    private final        BreakoutSubassemblies  breakoutSubassemblies2;
-    private final        GroupSalesOrders       groupData;
+    private final List<Task<?>>         tasks;
+    private final GroupSalesOrders      groupSalesOrders;
+    private final FilterSubassemblies   filterSubassemblies;
+    private final BreakoutSubassemblies breakoutSubassemblies;
+    private final GroupSalesOrders      groupSalesOrders1;
+    private final FilterSubassemblies   filterSubassemblies1;
+    private final BreakoutSubassemblies breakoutSubassemblies1;
+    private final GroupSalesOrders      groupSalesOrders2;
+    private final FilterSubassemblies   filterSubassemblies2;
+    private final BreakoutSubassemblies breakoutSubassemblies2;
+    private final GroupSalesOrders      groupData;
+    private final CreateSalesOrders     createSalesOrders;
     /**
      * The total progress of this task
      */
-    private final        DoubleBinding          totalProgress;
-    private final        KitMapper              kitMapper;
-    private final        KitMapping             kitMapping;
+    private final DoubleBinding         totalProgress;
+    private final KitMapper             kitMapper;
+    private final KitMapping            kitMapping;
 
     /**
      * The constructor for this class
@@ -98,22 +100,27 @@ public class POROpenSales {
         tasks = new ArrayList<>();
         mapTemplate = new MapTemplate();
         tableConvertTask = new ServerTableConvertTask(
-                "SELECT TransactionItems.CNTR         AS [Contract Number],\n" +
-                "       CustomerFile.NAME             as [Customer Name],\n" +
-                "       Transactions.DATE             AS [Transaction Date],\n" +
-                "       Salesman.Name                 AS [Transaction Sales Rep],\n" +
-                "       ItemFile.[KEY]                as [Item No],\n" +
-                "       ItemFile.Name                 as [Item Name],\n" +
+                "SELECT TransactionItems.CNTR             AS [Contract Number],\n" +
+                "       CustomerFile.NAME                 as [Customer Name],\n" +
+                "       Transactions.DATE                 AS [Transaction Date],\n" +
+                "       Salesman.Name                     AS [Transaction Sales Rep],\n" +
+                "       ItemFile.[KEY]                    as [Item No],\n" +
+                "       iif((ItemFile.[KEY] = 'ACC-TENTNATC' OR ItemFile.[KEY] like 'ACC-ACCNAT%' or\n" +
+                "            ItemFile.[KEY] = 'ACC-FLDSUPP' or ItemFile.[KEY] = 'ACC-FLRNAT' or ItemFile.[KEY] = 'ACC-HVAC' OR\n" +
+                "            ItemFile.[KEY] = 'ACC-TENTNATC_S' OR ItemFile.[KEY] = 'NOTE'),\n" +
+                "           iif(TransactionItems.[Desc] = '', ItemFile.Name, TransactionItems.[Desc]),\n" +
+                "           ItemFile.Name)\n" +
+                "                                         as [Item Name],\n" +
                 "       TransactionItems.QTY,\n" +
-                "       TransactionItems.PRIC         as [Sales Price],\n" +
-                "       ItemDepartment.DepartmentName as [Item Department],\n" +
-                "       ItemFile.CurrentStore         AS [Location],\n" +
+                "       TransactionItems.PRIC             as [Sales Price],\n" +
+                "       ItemDepartment.DepartmentName     as [Item Department],\n" +
+                "       ItemFile.CurrentStore             AS [Location],\n" +
                 "       Transactions.DeliveryDate,\n" +
                 "       Transactions.DeliveryAddress,\n" +
                 "       Transactions.DeliveryCity,\n" +
                 "       Transactions.DeliveryZip,\n" +
-                "       Transactions.Contact          as [Delivery Contact],\n" +
-                "       Transactions.ContactPhone     as [Delivery Contact Phone Num],\n" +
+                "       Transactions.Contact              as [Delivery Contact],\n" +
+                "       Transactions.ContactPhone         as [Delivery Contact Phone Num],\n" +
                 "       CustomerFile.Terms,\n" +
                 "       CustomerFile.BillContact,\n" +
                 "       CustomerFile.BillPhone,\n" +
@@ -136,8 +143,9 @@ public class POROpenSales {
                 "       Transactions.PickupDate,\n" +
                 "       Transactions.STR,\n" +
                 "       ItemCategory.Name,\n" +
-                "       isnull(ServiceMap.ServiceName, '') as ServiceName,\n" +
-                "       isnull(ServiceMap.ServiceID,0) as ServiceID\n" +
+                "       isnull(ServiceMap.ServiceName, 0) as ServiceName,\n" +
+                "       isnull(ServiceMap.ServiceID, 0)   as ServiceID,\n" +
+                "       Transactions.JOBN\n" +
                 "FROM TransactionItems\n" +
                 "         LEFT JOIN Transactions on Transactions.CNTR = TransactionItems.CNTR\n" +
                 "         LEFT JOIN ItemFile on TransactionItems.ITEM = ItemFile.NUM\n" +
@@ -186,6 +194,7 @@ public class POROpenSales {
                 "                   on ItemFile.Category = ServiceMap.ItemCatID and ItemFile.Department = ServiceMap.ItemDeptID"
         );
         groupData = new GroupSalesOrders();
+        createSalesOrders = new CreateSalesOrders();
         kitMapper = new KitMapper();
         kitMapping = (KitMapping) kitMapper.getTasks().get(1);
         writeTask1 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey Tent & Awning.xlsx"));
@@ -210,6 +219,7 @@ public class POROpenSales {
         tasks.add(tableConvertTask);
         tasks.add(groupData);
         tasks.add(mapTemplate);
+        tasks.add(createSalesOrders);
         tasks.addAll(kitMapper.getTasks());
         tasks.add(groupSalesOrders);
         tasks.add(filterSubassemblies);
@@ -229,6 +239,7 @@ public class POROpenSales {
         tasks.add(writeTask7);
         totalProgress = Bindings.createDoubleBinding(() -> (Math.max(0, tableConvertTask.getProgress()) +
                                                             Math.max(0, groupData.getProgress()) +
+                                                            Math.max(0, createSalesOrders.getProgress()) +
                                                             Math.max(0, mapTemplate.getProgress()) +
                                                             Math.max(0, kitMapper.getTotalProgress()) +
                                                             Math.max(0, groupSalesOrders.getProgress()) +
@@ -247,9 +258,10 @@ public class POROpenSales {
                                                             Math.max(0, writeTask5.getProgress()) +
                                                             Math.max(0, writeTask6.getProgress()) +
                                                             Math.max(0, writeTask7.getProgress())
-                                                           ) / 20,
+                                                           ) / 21,
                                                      tableConvertTask.progressProperty(),
                                                      groupData.progressProperty(),
+                                                     createSalesOrders.progressProperty(),
                                                      mapTemplate.progressProperty(),
                                                      kitMapper.totalProgressProperty(),
                                                      groupSalesOrders.progressProperty(),
@@ -318,7 +330,11 @@ public class POROpenSales {
             executorService.submit(groupData);
         });
         groupData.setOnSucceeded(event -> {
-            mapTemplate.setData(groupData.getValue());
+            createSalesOrders.setData(groupData.getValue());
+            executorService.submit(createSalesOrders);
+        });
+        createSalesOrders.setOnSucceeded(event -> {
+            mapTemplate.setData(createSalesOrders.getValue());
             executorService.submit(mapTemplate);
         });
         mapTemplate.setOnSucceeded(event -> {
@@ -429,6 +445,237 @@ public class POROpenSales {
         return totalProgress;
     }
 
+
+    private static class CreateSalesOrders extends Task<List<SalesOrder>> {
+
+        private static final Utils                                utils = Utils.getInstance();
+        private final        List<SalesOrder>                     salesOrders;
+        /**
+         * Local copy of the data to map
+         */
+        private              MultiValuedMap<String, List<String>> data;
+
+        private CreateSalesOrders() {
+            this.salesOrders = new ArrayList<>();
+        }
+
+        /**
+         * Invoked when the Task is executed, the call method must be overridden and
+         * implemented by subclasses. The call method actually performs the
+         * background thread logic. Only the updateProgress, updateMessage, updateValue and
+         * updateTitle methods of Task may be called from code within this method.
+         * Any other interaction with the Task from the background thread will result
+         * in runtime exceptions.
+         *
+         * @return The result of the background work, if any.
+         *
+         * @throws Exception an unhandled exception which occurred during the
+         *                   background operation
+         */
+        @Override
+        protected List<SalesOrder> call() throws Exception {
+            double progress = 0.0;
+            double progressUpdate = 1.0 / data.keySet().size();
+            updateProgress(progress, 1.0);
+            for (String salesKey : data.keySet()) {
+                SalesOrder salesOrder = new SalesOrder(salesKey);
+                List<List<String>> dataSet = new ArrayList<>(data.get(salesKey));
+                if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("mts")) {
+                    List<List<String>> structures = findStructure(dataSet, "mts");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("h334")) {
+                    List<List<String>> structures = findStructure(dataSet, "h334");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("l300") ||
+                         dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("lm300")
+                ) {
+                    List<List<String>> structures = findStructure(dataSet, "l300");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("h202")) {
+                    List<List<String>> structures = findStructure(dataSet, "h202");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("max756")) {
+                    List<List<String>> structures = findStructure(dataSet, "max756");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("boomerang") ||
+                         dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("bmrg")) {
+                    List<List<String>> structures = findStructure(dataSet, "boomerang");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("arcum")) {
+                    List<List<String>> structures = findStructure(dataSet, "arcum");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else if (dataSet.get(0).get(40).trim().toLowerCase(Locale.ROOT).contains("l200")) {
+                    List<List<String>> structures = findStructure(dataSet, "l200");
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                else {
+                    List<List<String>> structures = findStructures(dataSet);
+                    findMainStructures(salesKey, salesOrder, dataSet, structures);
+                }
+                salesOrder.setItemLines(dataSet);
+                salesOrders.add(salesOrder);
+                progress += progressUpdate;
+                updateProgress(progress, 1.0);
+            }
+            return salesOrders;
+        }
+
+        @Override
+        protected void succeeded() {
+            updateProgress(1.0, 1.0);
+            super.succeeded();
+        }
+
+        /**
+         * Logs the exception when the task transitions to the failure state
+         */
+        @Override
+        protected void failed() {
+            logger.fatal("Mapping Failed", getException());
+            System.exit(-1);
+        }
+
+        private List<List<String>> findStructure(List<List<String>> dataSet, String type) {
+            List<List<String>> structure = new ArrayList<>();
+            for (List<String> list : dataSet) {
+                if (type.equalsIgnoreCase("mts")) {
+                    if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") ||
+                         list.get(4).trim().equalsIgnoreCase("ACC-TENTNATC")
+                        ) && (list.get(5).trim().toLowerCase(
+                            Locale.ROOT).contains("mts") ||
+                              list.get(5)
+                                  .trim()
+                                  .toLowerCase(Locale.ROOT)
+                                  .contains("tension")
+                        )) {
+                        structure.add(list);
+                    }
+                }
+                else if (type.equalsIgnoreCase("h334")) {
+                    if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") ||
+                         list.get(4).trim().equalsIgnoreCase("ACC-TENTNATC")
+                        ) && (list.get(5).trim().toLowerCase(
+                            Locale.ROOT).contains("h334") ||
+                              list.get(5)
+                                  .trim()
+                                  .toLowerCase(Locale.ROOT)
+                                  .contains("334")
+                        )) {
+                        structure.add(list);
+                    }
+                }
+                else if (type.equalsIgnoreCase("l300")) {
+                    if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") ||
+                         list.get(4).trim().equalsIgnoreCase("ACC-TENTNATC")
+                        ) &&
+                        (list.get(5).trim().toLowerCase(Locale.ROOT).contains("lm300") ||
+                         list.get(5).trim().toLowerCase(Locale.ROOT).contains("lm 300") ||
+                         list.get(5).trim().toLowerCase(Locale.ROOT).contains("l 300") ||
+                         list.get(5).trim().toLowerCase(Locale.ROOT).contains("l300") ||
+                         list.get(5).trim().toLowerCase(Locale.ROOT).contains("clearspan")
+                        )) {
+                        structure.add(list);
+                    }
+                }
+                else if (type.equalsIgnoreCase("h202")) {
+                    if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") ||
+                         list.get(4).trim().equalsIgnoreCase("ACC-TENTNATC")
+                        ) && (list.get(5).trim().toLowerCase(Locale.ROOT).contains("h202") ||
+                              list.get(5).trim().toLowerCase(Locale.ROOT).contains("h 202") ||
+                              list.get(5).trim().toLowerCase(Locale.ROOT).contains("202") ||
+                              list.get(5).trim().toLowerCase(Locale.ROOT).contains("clearspan")
+                        )) {
+                        structure.add(list);
+                    }
+                }
+                else if (type.equalsIgnoreCase("boomerang")) {
+                    if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") ||
+                         list.get(4).trim().equalsIgnoreCase("ACC-TENTNATC")
+                        ) && (list.get(5).trim().toLowerCase(Locale.ROOT).contains("boomerang")
+                        )) {
+                        structure.add(list);
+                    }
+                }
+                else if (type.equalsIgnoreCase("max756")) {
+                    if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") ||
+                         list.get(4).trim().equalsIgnoreCase("ACC-TENTNATC")
+                        ) && (list.get(5).trim().toLowerCase(Locale.ROOT).contains("max 756") ||
+                              list.get(5).trim().toLowerCase(Locale.ROOT).contains("max756")
+                        )) {
+                        structure.add(list);
+                    }
+                }
+                else if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") &&
+                          (list.get(5).trim().toLowerCase(Locale.ROOT).contains("structure") ||
+                           list.get(5).trim().toLowerCase(Locale.ROOT).contains("boomerang")
+                          )
+                )) {
+                    structure.add(list);
+                }
+            }
+            return structure;
+        }
+
+        private void findMainStructures(String salesKey,
+                                        SalesOrder salesOrder,
+                                        List<List<String>> dataSet,
+                                        List<List<String>> structures
+        ) {
+            if (structures.size() > 0) {
+                dataSet.remove(structures.get(0));
+                salesOrder.setMainStructure(structures.get(0));
+            }
+            else {
+                List<List<String>> bays = findBays(dataSet);
+                if (bays.size() > 0) {
+                    dataSet.remove(bays.get(0));
+                    salesOrder.setMainStructure(bays.get(0));
+                }
+                else {
+                    logger.debug("Zero Length Contract Num {}", salesKey);
+                }
+            }
+        }
+
+        private List<List<String>> findStructures(List<List<String>> dataSet) {
+            List<List<String>> structures = new ArrayList<>();
+            for (List<String> list : dataSet) {
+                if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(".") &&
+                     (list.get(5).trim().toLowerCase(Locale.ROOT).contains("structure") ||
+                      list.get(5).trim().toLowerCase(Locale.ROOT).contains("boomerang")
+                     )
+                )) {
+                    structures.add(list);
+                }
+            }
+            return structures;
+        }
+
+        private List<List<String>> findBays(List<List<String>> dataSet) {
+            List<List<String>> bays = new ArrayList<>();
+            for (List<String> list : dataSet) {
+                if ((list.get(4).trim().toLowerCase(Locale.ROOT).contains(":") &&
+                     (list.get(5).trim().toLowerCase(Locale.ROOT).contains("bay")
+                     )
+                )) {
+                    bays.add(list);
+                }
+            }
+            return bays;
+        }
+
+        public void setData(MultiValuedMap<String, List<String>> data) {
+            this.data = data;
+        }
+    }
+
     /**
      * Maps the data to the Open Sales Template
      */
@@ -437,50 +684,50 @@ public class POROpenSales {
         /**
          * The instance of the Utils class
          */
-        private static final Utils                                utils           = Utils.getInstance();
+        private static final Utils                    utils           = Utils.getInstance();
         /**
          * The instance of the MapperUtils class
          */
-        private static final MapperUtils                          mapperUtils     = MapperUtils.getInstance();
+        private static final MapperUtils              mapperUtils     = MapperUtils.getInstance();
         /**
          * The template associated with this mapping
          */
-        private static final String                               template
-                                                                                  = "/templates/Open Sales Order Template_MFG FINAL.xlsx";
+        private static final String                   template
+                                                                      = "/templates/Open Sales Order Template_MFG FINAL.xlsx";
         /**
          * The corrections file associated with this mapping
          */
-        private static final String                               correctionsFile = "./corrections/por.txt";
-        private static final Logger                               logger          = LogManager.getLogger();
+        private static final String                   correctionsFile = "./corrections/por.txt";
+        private static final Logger                   logger          = LogManager.getLogger();
         /**
          * The header of the template
          */
-        private final        List<String>                         header;
+        private final        List<String>             header;
         /**
          * The map containing the incorrect string and its correction
          */
-        private final        Map<String, String>                  corrections;
+        private final        Map<String, String>      corrections;
         /**
          * The table that stores the mapped data for store 1
          */
-        private final        List<List<String>>                   mapTable1;
+        private final        List<List<String>>       mapTable1;
         /**
          * The table that stores the mapped data for store 2
          */
-        private final        List<List<String>>                   mapTable2;
+        private final        List<List<String>>       mapTable2;
         /**
          * The table that stores the mapped data for store 3
          */
-        private final        List<List<String>>                   mapTable3;
-        private final        List<List<String>>                   mapTableAll;
+        private final        List<List<String>>       mapTable3;
+        private final        List<List<String>>       mapTableAll;
         /**
          * The list of tables for every store listed in POR
          */
-        private final        List<List<List<String>>>             tables;
+        private final        List<List<List<String>>> tables;
         /**
          * Local copy of the data to map
          */
-        private              MultiValuedMap<String, List<String>> data;
+        private              List<SalesOrder>         data;
 
         /**
          * The constructor for this inner class
@@ -512,8 +759,14 @@ public class POROpenSales {
             updateProgress(0, 1.0);
             double progressUpdate = 1.0 / data.size() / header.size();
             ExecutorService service = CustomExecutors.newFixedThreadPool(20);
-            for (String s : data.keySet()) {
-                List<List<String>> list = new ArrayList<>(data.get(s));
+            for (SalesOrder salesOrder : data) {
+                if (salesOrder.getSalesOrderNum().equalsIgnoreCase("7865")) {
+                    continue;
+                }
+                List<List<String>> list = new ArrayList<>(salesOrder.getItemLines());
+                if (salesOrder.getMainStructure().size() > 0) {
+                    list.add(0, salesOrder.getMainStructure());
+                }
                 Iterable<List<List<String>>> partition = Iterables.partition(list, 10);
                 ExecutorService executorService = CustomExecutors.newFixedThreadPool(20);
                 service.submit(() -> {
@@ -522,11 +775,10 @@ public class POROpenSales {
                             String[] split;
                             String dateString;
                             loopBreak:
-                            for (int i = 0; i < dataTempString.size(); i++) {
+                            for (List<String> strings : dataTempString) {
                                 if (isCancelled()) {
                                     break;
                                 }
-                                List<String> row = dataTempString.get(i);
                                 String[] mapRow = new String[header.size()];
                                 for (int j = 0; j < header.size(); j++) {
                                     if (isCancelled()) {
@@ -535,17 +787,17 @@ public class POROpenSales {
                                     switch (j) {
                                         case 0:
                                         case 1:
-                                            mapRow[j] = row.get(0).trim() + "@";
+                                            mapRow[j] = strings.get(0).trim() + "@";
                                             break;
                                         case 2:
-                                            mapRow[j] = row.get(1).trim();
+                                            mapRow[j] = strings.get(1).trim();
                                             break;
                                         case 3:
                                         case 5:
-                                            mapRow[j] = row.get(2).trim();
+                                            mapRow[j] = strings.get(2).trim();
                                             break;
                                         case 4:
-                                            if (row.get(33).trim().equalsIgnoreCase("1")) {
+                                            if (strings.get(33).trim().equalsIgnoreCase("1")) {
                                                 mapRow[j] = "Review Billing";
                                             }
                                             else {
@@ -553,40 +805,40 @@ public class POROpenSales {
                                             }
                                             break;
                                         case 6:
-                                            dateString = row.get(32).trim();
+                                            dateString = strings.get(32).trim();
                                             if (dateString.contains("1899-12-30")) {
-                                                mapRow[j] = row.get(35).trim();
+                                                mapRow[j] = strings.get(35).trim();
                                             }
                                             else {
                                                 mapRow[j] = dateString;
                                             }
                                             break;
                                         case 8:
-                                            if (list.indexOf(row) == 0) {
-                                                mapRow[j] = row.get(28).trim() + "^";
+                                            if (list.indexOf(strings) == 0) {
+                                                mapRow[j] = strings.get(28).trim() + "^";
                                             }
                                             else {
                                                 mapRow[j] = "";
                                             }
                                             break;
                                         case 9:
-                                            mapRow[j] = row.get(3).trim();
+                                            mapRow[j] = strings.get(3).trim();
                                             break;
                                         case 21:
-                                            String itemKey = row.get(4).trim();
+                                            String itemKey = strings.get(4).trim();
                                             mapRow[j] = itemKey;
                                             break;
                                         case 22:
-                                            mapRow[j] = row.get(6).trim() + "#";
+                                            mapRow[j] = strings.get(6).trim() + "#";
                                             break;
                                         case 25:
                                             try {
-                                                double amount = Double.parseDouble(row.get(7).trim());
+                                                double amount = Double.parseDouble(strings.get(7).trim());
                                                 if (amount == 0) {
-                                                    mapRow[j] = row.get(7).trim();
+                                                    mapRow[j] = strings.get(7).trim();
                                                 }
                                                 else {
-                                                    double qty = Double.parseDouble(row.get(6).trim());
+                                                    double qty = Double.parseDouble(strings.get(6).trim());
                                                     double result = amount / qty;
                                                     if (Double.isNaN(result) || Double.isInfinite(result)) {
                                                         logger.fatal("Divide by zero error");
@@ -599,20 +851,20 @@ public class POROpenSales {
                                             }
                                             break;
                                         case 26:
-                                            mapRow[j] = row.get(7).trim();
+                                            mapRow[j] = strings.get(7).trim();
                                             break;
                                         case 27:
-                                            mapRow[j] = row.get(5).trim();
+                                            mapRow[j] = strings.get(5).trim();
                                             break;
                                         case 28:
                                         case 62:
                                             mapRow[j] = "TRUE";
                                             break;
                                         case 30:
-                                            mapRow[j] = row.get(8).trim();
+                                            mapRow[j] = strings.get(8).trim();
                                             break;
                                         case 32:
-                                            String currentStore = row.get(9).trim();
+                                            String currentStore = strings.get(9).trim();
                                             if (currentStore.equalsIgnoreCase("003")) {
                                                 mapRow[j] = "Houston Depot";
                                             }
@@ -621,19 +873,19 @@ public class POROpenSales {
                                             }
                                             break;
                                         case 36:
-                                            dateString = row.get(10).trim();
+                                            dateString = strings.get(10).trim();
                                             if (dateString.contains("1899-12-30")) {
-                                                mapRow[j] = row.get(2).trim();
+                                                mapRow[j] = strings.get(2).trim();
                                             }
                                             else {
                                                 mapRow[j] = dateString;
                                             }
                                             break;
                                         case 41:
-                                            mapRow[j] = row.get(14).trim();
+                                            mapRow[j] = strings.get(14).trim();
                                             break;
                                         case 43:
-                                            split = row.get(11).trim().split(", ");
+                                            split = strings.get(11).trim().split(", ");
                                             mapRow[j] = split[0];
                                             try {
                                                 mapRow[j + 1] = split[1];
@@ -643,7 +895,7 @@ public class POROpenSales {
                                             }
                                             break;
                                         case 45:
-                                            split = row.get(12).trim().split(", ");
+                                            split = strings.get(12).trim().split(", ");
                                             mapRow[j] = split[0];
                                             try {
                                                 mapRow[j + 1] = split[1];
@@ -658,55 +910,58 @@ public class POROpenSales {
                                         case 77:
                                             break;
                                         case 47:
-                                            mapRow[j] = row.get(13).trim();
+                                            mapRow[j] = strings.get(13).trim();
                                             break;
                                         case 49:
-                                            mapRow[j] = row.get(15).trim();
+                                            mapRow[j] = strings.get(15).trim();
                                             break;
                                         case 50:
-                                            mapRow[j] = row.get(16).trim();
+                                            mapRow[j] = strings.get(16).trim();
                                             break;
                                         case 51:
-                                            mapRow[j] = row.get(17).trim();
+                                            mapRow[j] = strings.get(17).trim();
                                             break;
                                         case 53:
-                                            mapRow[j] = row.get(19).trim();
+                                            mapRow[j] = strings.get(19).trim();
                                             break;
                                         case 54:
-                                            mapRow[j] = row.get(20).trim();
+                                            mapRow[j] = strings.get(20).trim();
                                             break;
                                         case 55:                                            /*Checks to see if the city and state is blank*/
-                                            if (utils.isBlankString(row.get(21))) {
+                                            if (utils.isBlankString(strings.get(21))) {
                                                 mapRow[j] = "";
                                                 mapRow[j + 1] = "";
                                             }                                            /*Checks to see if the city and state has a correction*/
-                                            else if (corrections.containsKey(row.get(21).trim())) {
-                                                split = corrections.get(row.get(21).trim()).split(",");
+                                            else if (corrections.containsKey(strings.get(21).trim())) {
+                                                split = corrections.get(strings.get(21).trim()).split(",");
                                                 mapRow[j] = split[0].trim();
                                                 mapRow[j + 1] = split[1].trim();
                                             }
                                             else {
-                                                split = row.get(21).split(",");
+                                                split = strings.get(21).split(",");
                                                 mapRow[j] = split[0].trim();
                                                 try {
                                                     mapRow[j + 1] = split[1].trim();
                                                 }
                                                 catch (ArrayIndexOutOfBoundsException e) {
-                                                    logger.fatal("Array out of bound for string {}", row.get(21), e);
+                                                    logger.fatal("Array out of bound for string {}",
+                                                                 strings.get(21),
+                                                                 e
+                                                    );
                                                     System.exit(1);
                                                 }
                                             }
                                             break;
                                         case 57:
-                                            if (utils.isBlankString(row.get(23))) {
-                                                mapRow[j] = row.get(22);
+                                            if (utils.isBlankString(strings.get(23))) {
+                                                mapRow[j] = strings.get(22);
                                             }
-                                            else if (utils.isBlankString(row.get(22)) &&
-                                                     utils.isBlankString(row.get(23))) {
+                                            else if (utils.isBlankString(strings.get(22)) &&
+                                                     utils.isBlankString(strings.get(23))) {
                                                 mapRow[j] = "";
                                             }
                                             else {
-                                                mapRow[j] = row.get(22) + "-" + row.get(23);
+                                                mapRow[j] = strings.get(22) + "-" + strings.get(23);
                                             }
                                             break;
                                         case 48:
@@ -715,17 +970,17 @@ public class POROpenSales {
                                             mapRow[j] = "USA";
                                             break;
                                         case 59:
-                                            mapRow[j] = row.get(18).trim();
+                                            mapRow[j] = strings.get(18).trim();
                                             break;
                                         case 61:
                                             mapRow[j] = "1#";
                                             break;
                                         case 63:
-                                            String taxState = row.get(26).trim().substring(0, 2);
+                                            String taxState = strings.get(26).trim().substring(0, 2);
                                             mapRow[j] = taxState;
                                             break;
                                         case 64:
-                                            mapRow[j] = row.get(34).trim() + "%";
+                                            mapRow[j] = strings.get(34).trim() + "%";
                                             break;
                                         case 65:
                                         case 66:
@@ -733,25 +988,25 @@ public class POROpenSales {
                                             mapRow[j] = "FALSE";
                                             break;
                                         case 67:
-                                            mapRow[j] = row.get(24).trim();
+                                            mapRow[j] = strings.get(24).trim();
                                             break;
                                         case 69:
-                                            mapRow[j] = row.get(25).trim();
+                                            mapRow[j] = strings.get(25).trim();
                                             break;
                                         case 72:
-                                            mapRow[j] = row.get(27).trim() + "@";
+                                            mapRow[j] = strings.get(27).trim() + "@";
                                             break;
                                         case 73:
-                                            mapRow[j] = row.get(29).trim() + "@";
+                                            mapRow[j] = strings.get(29).trim() + "@";
                                             break;
                                         case 74:
-                                            mapRow[j] = row.get(30).trim();
+                                            mapRow[j] = strings.get(30).trim();
                                             break;
                                         case 75:
-                                            mapRow[j] = row.get(31).trim() + "^";
+                                            mapRow[j] = strings.get(31).trim() + "^";
                                             break;
                                         case 76:
-                                            switch (row.get(4).trim()) {
+                                            switch (strings.get(4).trim()) {
                                                 case "DMGWVR":
                                                     mapRow[j] = "Damage Waiver - Monthly Billing@";
                                                     mapRow[j + 1] = "6076#";
@@ -776,18 +1031,33 @@ public class POROpenSales {
                                                     mapRow[j] = "SALSUB@";
                                                     mapRow[j + 1] = "9436#";
                                                     break;
+                                                case "DORSUB":
+                                                    mapRow[j] = "DORSUB@";
+                                                    mapRow[j + 1] = "9446#";
+                                                    break;
                                                 case "LAB-010":
                                                     mapRow[j] = "Hotel/Per Diem - Monthly Billing@";
                                                     mapRow[j + 1] = "6073#";
                                                     break;
                                                 default:
-                                                    mapRow[j] = row.get(38).trim() + "@";
-                                                    mapRow[j + 1] = row.get(39).trim() + "#";
+                                                    mapRow[j] = strings.get(38).trim() + "@";
+                                                    mapRow[j + 1] = strings.get(39).trim() + "#";
                                                     break;
+                                            }
+                                            if (strings.get(38).equalsIgnoreCase("0")) {
+                                                try {
+                                                    mapRow[j] = salesOrder.getMainStructure().get(38).trim() + "@";
+                                                    mapRow[j + 1] = salesOrder.getMainStructure().get(39).trim() + "#";
+                                                }
+                                                catch (IndexOutOfBoundsException e) {
+                                                    logger.debug("Sales Order to Check {}",
+                                                                 salesOrder.getSalesOrderNum()
+                                                    );
+                                                }
                                             }
                                             break;
                                         case 78:
-                                            mapRow[j] = row.get(37).trim() + "@";
+                                            mapRow[j] = strings.get(37).trim() + "@";
                                             break;
                                         default:
                                             mapRow[j] = "";
@@ -796,7 +1066,7 @@ public class POROpenSales {
                                     progress.updateAndGet(v -> v + progressUpdate);
                                     updateProgress(progress.get(), 1.0);
                                 }
-                                switch (row.get(36).trim()) {
+                                switch (strings.get(36).trim()) {
                                     case "001":
                                         mapTable1Temp.add(new ArrayList<>(Arrays.asList(mapRow)));
                                         break;
@@ -847,8 +1117,8 @@ public class POROpenSales {
          *
          * @param data The data to map
          */
-        public void setData(MultiValuedMap<String, List<String>> data) {
-            this.data = new ArrayListValuedHashMap<>(data);
+        public void setData(List<SalesOrder> data) {
+            this.data = new ArrayList<>(data);
         }
     }
 

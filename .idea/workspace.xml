@@ -8,7 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_annotations_20_1_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/objects/SalesOrder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/DataProcessing.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DataProcessing.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" afterDir="false" />
     </list>
     <list id="f8617058-69cc-42af-8bf3-2f8d9d7f275b" name="Revert &quot;Initial commit&quot;" comment="Revert &quot;Initial commit&quot;&#10;&#10;This reverts commit 63715dbe" />
@@ -416,6 +421,10 @@
       <workItem from="1622722404560" duration="11347000" />
       <workItem from="1623068529491" duration="7057000" />
       <workItem from="1623155372397" duration="59000" />
+      <workItem from="1623155500805" duration="757000" />
+      <workItem from="1623272698673" duration="601000" />
+      <workItem from="1623328083998" duration="19447000" />
+      <workItem from="1623415783818" duration="15134000" />
     </task>
     <task id="LOCAL-00001" summary="Updated .gitignore">
       <created>1617638919949</created>
@@ -501,7 +510,14 @@
       <option name="project" value="LOCAL" />
       <updated>1622752435088</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Added more cases for service items.&#10;Need to look at separating part items.">
+      <created>1623156332685</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1623156332685</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -547,39 +563,14 @@
     <MESSAGE value="Revert &quot;Delete Inventory Item Template1.xlsx&quot;&#10;&#10;This reverts commit 6a2bad6b" />
     <MESSAGE value="Added mapping for Product Service Categories" />
     <MESSAGE value="Cleaned up code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cleaned up code" />
+    <MESSAGE value="Added more cases for service items.&#10;Need to look at separating part items." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added more cases for service items.&#10;Need to look at separating part items." />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <breakpoint type="java-exception">
-          <dependency leave-enabled="true" master-id="0" />
-          <properties class="java.lang.ArrayIndexOutOfBoundsException" package="java.lang" />
-          <option name="timeStamp" value="10" />
-        </breakpoint>
-        <breakpoint type="java-exception">
-          <dependency leave-enabled="true" master-id="0" />
-          <properties class="java.lang.NumberFormatException" package="java.lang" />
-          <option name="timeStamp" value="19" />
-        </breakpoint>
-        <breakpoint type="java-exception">
-          <properties class="com.microsoft.sqlserver.jdbc.SQLServerException" package="com.microsoft.sqlserver.jdbc" />
-          <option name="timeStamp" value="27" />
-        </breakpoint>
-        <breakpoint type="java-exception">
-          <dependency leave-enabled="true" master-id="0" />
-          <properties class="java.lang.NullPointerException" package="java.lang" />
-          <option name="timeStamp" value="80" />
-        </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/tasks/ServerTableConvertTask.java</url>
-          <line>79</line>
-          <option name="timeStamp" value="82" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="java-exception">
           <dependency leave-enabled="true" master-id="0" />
@@ -594,12 +585,9 @@
     </pin-to-top-manager>
     <watches-manager>
       <configuration name="MavenRunConfiguration">
-        <watch expression="grandTotal" />
-        <watch expression="((Row)rowSet.toCollection().toArray()[0]).getColumnObject(7)" language="JAVA" custom="com.sun.rowset.internal.Row" />
-        <watch expression="((Row) list.get(0)).getOrigRow()" language="JAVA" custom="com.sun.rowset.internal.Row" />
-        <watch expression="rowSet.getMetaData().getColumnName(3)" language="JAVA" />
-        <watch expression="tables.get(1)" />
-        <watch expression="rowSet.toCollection()" language="JAVA" />
+        <watch expression="salesOrders.get(27)" />
+        <watch expression="strings.get(38)" language="JAVA" />
+        <watch expression="strings.get(39)" language="JAVA" />
       </configuration>
     </watches-manager>
   </component>
