@@ -75,7 +75,7 @@ public class PORCustomer {
     /**
      * The overall progress of this task
      */
-    private final        DoubleBinding          overallTaskProgress;
+    private final        DoubleBinding          totalProgress;
     /**
      * The first server table convert task
      */
@@ -163,20 +163,20 @@ public class PORCustomer {
         tasks.add(mapCallLog);
         tasks.add(setSalesReps);
         tasks.add(writeTask);
-        overallTaskProgress = Bindings.createDoubleBinding(() -> (
-                                                                         Math.max(0, tableConvertTask.getProgress()) +
-                                                                         Math.max(0, tableConvertTask1.getProgress()) +
-                                                                         Math.max(0, databaseMapProgress.get()) +
-                                                                         Math.max(0, mapCallLog.getProgress()) +
-                                                                         Math.max(0, setSalesReps.getProgress()) +
-                                                                         Math.max(0, writeTask.getProgress())
-                                                                 ) / 6,
-                                                           tableConvertTask.progressProperty(),
-                                                           tableConvertTask1.progressProperty(),
-                                                           databaseMapProgress,
-                                                           mapCallLog.progressProperty(),
-                                                           setSalesReps.progressProperty(),
-                                                           writeTask.progressProperty()
+        totalProgress = Bindings.createDoubleBinding(() -> (
+                                                                   Math.max(0, tableConvertTask.getProgress()) +
+                                                                   Math.max(0, tableConvertTask1.getProgress()) +
+                                                                   Math.max(0, databaseMapProgress.get()) +
+                                                                   Math.max(0, mapCallLog.getProgress()) +
+                                                                   Math.max(0, setSalesReps.getProgress()) +
+                                                                   Math.max(0, writeTask.getProgress())
+                                                           ) / 6,
+                                                     tableConvertTask.progressProperty(),
+                                                     tableConvertTask1.progressProperty(),
+                                                     databaseMapProgress,
+                                                     mapCallLog.progressProperty(),
+                                                     setSalesReps.progressProperty(),
+                                                     writeTask.progressProperty()
         );
     }
 
@@ -185,8 +185,8 @@ public class PORCustomer {
      *
      * @return The value the task's overall progress
      */
-    public double getOverallTaskProgress() {
-        return overallTaskProgress.get();
+    public double getTotalProgress() {
+        return totalProgress.get();
     }
 
     /**
@@ -204,10 +204,12 @@ public class PORCustomer {
      * @param executorService The controller thread executor
      */
     public void map(ExecutorService executorService) {
+        tableConvertTask.setOnSucceeded(event -> executorService.submit(tableConvertTask1));
         tableConvertTask1.setOnSucceeded(event -> {
             List<List<String>> value = utils.convertToTableString(tableConvertTask1.getValue());
+            List<List<String>> database = utils.convertToTableString(tableConvertTask.getValue());
             mapCallLog.setCallLog(value);
-            mapDatabase(value, executorService);
+            mapDatabase(database, executorService);
         });
         mapCallLog.setOnSucceeded(event -> {
             setSalesReps.setSalesReps(mapCallLog.getValue());
@@ -230,7 +232,7 @@ public class PORCustomer {
             executorService.submit(writeTask);
         });
         executorService.submit(tableConvertTask);
-        executorService.submit(tableConvertTask1);
+
     }
 
     /**
@@ -478,8 +480,8 @@ public class PORCustomer {
      *
      * @return The task's overall progress property
      */
-    public DoubleBinding overallTaskProgressProperty() {
-        return overallTaskProgress;
+    public DoubleBinding totalProgressProperty() {
+        return totalProgress;
     }
 
     /**

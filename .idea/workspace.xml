@@ -8,13 +8,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d49e606-50d4-4aa3-bb37-567dfdfc8cf7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_annotations_20_1_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/objects/SalesOrder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/DataProcessing.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DataProcessing.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORCustomer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORCustomer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/POROpenSales.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PORDebuggingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PORDebuggingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/dataprocessing/gui/controller/PorController.java" afterDir="false" />
     </list>
     <list id="f8617058-69cc-42af-8bf3-2f8d9d7f275b" name="Revert &quot;Initial commit&quot;" comment="Revert &quot;Initial commit&quot;&#10;&#10;This reverts commit 63715dbe" />
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +94,7 @@
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="settings.editor.selected.configurable" value="jformdesigner" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -424,7 +424,26 @@
       <workItem from="1623155500805" duration="757000" />
       <workItem from="1623272698673" duration="601000" />
       <workItem from="1623328083998" duration="19447000" />
-      <workItem from="1623415783818" duration="15134000" />
+      <workItem from="1623415783818" duration="17861000" />
+      <workItem from="1623520894035" duration="404000" />
+      <workItem from="1623674400746" duration="2274000" />
+      <workItem from="1623693009591" duration="551000" />
+      <workItem from="1623768473956" duration="665000" />
+      <workItem from="1623849327730" duration="151000" />
+      <workItem from="1623948492106" duration="542000" />
+      <workItem from="1623949400107" duration="350000" />
+      <workItem from="1623959206883" duration="1205000" />
+      <workItem from="1624022200588" duration="30000" />
+      <workItem from="1624027315414" duration="109000" />
+      <workItem from="1624290642035" duration="32000" />
+      <workItem from="1624290762986" duration="1574000" />
+      <workItem from="1624296034702" duration="35000" />
+      <workItem from="1624296084842" duration="460000" />
+      <workItem from="1624390586344" duration="845000" />
+      <workItem from="1625142333905" duration="58000" />
+      <workItem from="1626355078368" duration="5740000" />
+      <workItem from="1626440533962" duration="2802000" />
+      <workItem from="1626450514254" duration="1234000" />
     </task>
     <task id="LOCAL-00001" summary="Updated .gitignore">
       <created>1617638919949</created>
@@ -517,7 +536,14 @@
       <option name="project" value="LOCAL" />
       <updated>1623156332685</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Finished adding methods to map service items to open sales">
+      <created>1623442168169</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1623442168169</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -564,13 +590,21 @@
     <MESSAGE value="Added mapping for Product Service Categories" />
     <MESSAGE value="Cleaned up code" />
     <MESSAGE value="Added more cases for service items.&#10;Need to look at separating part items." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added more cases for service items.&#10;Need to look at separating part items." />
+    <MESSAGE value="Finished adding methods to map service items to open sales" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finished adding methods to map service items to open sales" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/dataprocessing/backend/mappers/por/PORCustomer.java</url>
+          <line>470</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="java-exception">
           <dependency leave-enabled="true" master-id="0" />
@@ -587,6 +621,7 @@
       <configuration name="MavenRunConfiguration">
         <watch expression="salesOrders.get(27)" />
         <watch expression="strings.get(38)" language="JAVA" />
+        <watch expression="((Row)((java.util.Vector)((CachedRowSetImpl)rowSet).rvh).get(0)).origVals" custom="java.util.Vector,com.sun.rowset.internal.Row,com.sun.rowset.CachedRowSetImpl" />
         <watch expression="strings.get(39)" language="JAVA" />
       </configuration>
     </watches-manager>

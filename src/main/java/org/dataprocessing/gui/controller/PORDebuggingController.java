@@ -22,7 +22,7 @@ import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dataprocessing.backend.database.SqlServer;
-import org.dataprocessing.backend.mappers.por.POROpenSales;
+import org.dataprocessing.backend.mappers.por.PORCustomer;
 import org.dataprocessing.gui.model.PorModel;
 import org.dataprocessing.utils.Alerts;
 import org.dataprocessing.utils.CustomExecutors;
@@ -199,11 +199,11 @@ public class PORDebuggingController {
                     logger.fatal("Unable to create directories.", e);
                     System.exit(-1);
                 }
-                POROpenSales porOpenSales = new POROpenSales(porStoreLocation);
+                //POROpenSales porOpenSales = new POROpenSales(porStoreLocation);
                 //POROpenPO porOpenSales = new POROpenPO(porStoreLocation);
                 //POROpenAR porOpenSales = new POROpenAR(porStoreLocation);
                 //PORItemMaster porOpenSales = new PORItemMaster(porStoreLocation);
-                //PORCustomer porOpenSales = new PORCustomer(porStoreLocation);
+                PORCustomer porOpenSales = new PORCustomer(porStoreLocation);
                 //KitMapper porOpenSales = new KitMapper();
                 model.addTasks(porOpenSales.getTasks());
                 DoubleBinding totalProgress = Bindings.createDoubleBinding(() -> (

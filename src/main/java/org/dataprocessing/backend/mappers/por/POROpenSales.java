@@ -17,7 +17,6 @@ import org.dataprocessing.backend.tasks.ServerTableConvertTask;
 import org.dataprocessing.utils.CustomExecutors;
 import org.dataprocessing.utils.FileUtils;
 import org.dataprocessing.utils.FileUtils.XlsxTask;
-import org.dataprocessing.utils.FileUtils.XlsxTaskMultiSheet;
 import org.dataprocessing.utils.MapperUtils;
 import org.dataprocessing.utils.Utils;
 
@@ -65,15 +64,12 @@ public class POROpenSales {
      * The third excel writing task
      */
     private final        XlsxTask               writeTask3;
-    private final        XlsxTaskMultiSheet     writeTask4;
-    private final        XlsxTaskMultiSheet     writeTask5;
-    private final        XlsxTaskMultiSheet     writeTask6;
     private final        XlsxTask               writeTask7;
     /**
      * The list of sub-tasks
      */
-    private final List<Task<?>>         tasks;
-    private final GroupSalesOrders      groupSalesOrders;
+    private final        List<Task<?>>          tasks;
+    /*private final GroupSalesOrders      groupSalesOrders;
     private final FilterSubassemblies   filterSubassemblies;
     private final BreakoutSubassemblies breakoutSubassemblies;
     private final GroupSalesOrders      groupSalesOrders1;
@@ -81,15 +77,15 @@ public class POROpenSales {
     private final BreakoutSubassemblies breakoutSubassemblies1;
     private final GroupSalesOrders      groupSalesOrders2;
     private final FilterSubassemblies   filterSubassemblies2;
-    private final BreakoutSubassemblies breakoutSubassemblies2;
-    private final GroupSalesOrders      groupData;
-    private final CreateSalesOrders     createSalesOrders;
+    private final BreakoutSubassemblies breakoutSubassemblies2;*/
+    private final        GroupSalesOrders       groupData;
+    private final        CreateSalesOrders      createSalesOrders;
     /**
      * The total progress of this task
      */
-    private final DoubleBinding         totalProgress;
-    private final KitMapper             kitMapper;
-    private final KitMapping            kitMapping;
+    private final        DoubleBinding          totalProgress;
+    private final        KitMapper              kitMapper;
+    private final        KitMapping             kitMapping;
 
     /**
      * The constructor for this class
@@ -107,7 +103,7 @@ public class POROpenSales {
                 "       ItemFile.[KEY]                    as [Item No],\n" +
                 "       iif((ItemFile.[KEY] = 'ACC-TENTNATC' OR ItemFile.[KEY] like 'ACC-ACCNAT%' or\n" +
                 "            ItemFile.[KEY] = 'ACC-FLDSUPP' or ItemFile.[KEY] = 'ACC-FLRNAT' or ItemFile.[KEY] = 'ACC-HVAC' OR\n" +
-                "            ItemFile.[KEY] = 'ACC-TENTNATC_S' OR ItemFile.[KEY] = 'NOTE'),\n" +
+                "            ItemFile.[KEY] = 'ACC-TENTNATC_S' OR ItemFile.[KEY] = 'NOTE' OR ItemFile.[KEY] like '%SUB'),\n" +
                 "           iif(TransactionItems.[Desc] = '', ItemFile.Name, TransactionItems.[Desc]),\n" +
                 "           ItemFile.Name)\n" +
                 "                                         as [Item Name],\n" +
@@ -145,7 +141,8 @@ public class POROpenSales {
                 "       ItemCategory.Name,\n" +
                 "       isnull(ServiceMap.ServiceName, 0) as ServiceName,\n" +
                 "       isnull(ServiceMap.ServiceID, 0)   as ServiceID,\n" +
-                "       Transactions.JOBN\n" +
+                "       Transactions.JOBN,\n" +
+                "       TransactionItems.[Desc]\n" +
                 "FROM TransactionItems\n" +
                 "         LEFT JOIN Transactions on Transactions.CNTR = TransactionItems.CNTR\n" +
                 "         LEFT JOIN ItemFile on TransactionItems.ITEM = ItemFile.NUM\n" +
@@ -200,14 +197,8 @@ public class POROpenSales {
         writeTask1 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey Tent & Awning.xlsx"));
         writeTask2 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey USA.xlsx"));
         writeTask3 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-Mahaffey USA-Houston.xlsx"));
-        writeTask4 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
-                "Open Sales Template-Filtered Mahaffey Tent & Awning.xlsx"));
-        writeTask5 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
-                "Open Sales Template-Filtered Mahaffey USA.xlsx"));
-        writeTask6 = fileUtils.writeXlsxTaskMultiSheet(storeLocation.resolve(
-                "Open Sales Template-Filtered Mahaffey USA-Houston.xlsx"));
         writeTask7 = fileUtils.writeXlsxTask(storeLocation.resolve("Open Sales Template-All.xlsx"));
-        groupSalesOrders = new GroupSalesOrders();
+        /*groupSalesOrders = new GroupSalesOrders();
         filterSubassemblies = new FilterSubassemblies();
         breakoutSubassemblies = new BreakoutSubassemblies();
         groupSalesOrders1 = new GroupSalesOrders();
@@ -215,13 +206,13 @@ public class POROpenSales {
         breakoutSubassemblies1 = new BreakoutSubassemblies();
         groupSalesOrders2 = new GroupSalesOrders();
         filterSubassemblies2 = new FilterSubassemblies();
-        breakoutSubassemblies2 = new BreakoutSubassemblies();
+        breakoutSubassemblies2 = new BreakoutSubassemblies();*/
         tasks.add(tableConvertTask);
         tasks.add(groupData);
         tasks.add(mapTemplate);
         tasks.add(createSalesOrders);
         tasks.addAll(kitMapper.getTasks());
-        tasks.add(groupSalesOrders);
+        /*tasks.add(groupSalesOrders);
         tasks.add(filterSubassemblies);
         tasks.add(breakoutSubassemblies);
         tasks.add(groupSalesOrders1);
@@ -229,20 +220,17 @@ public class POROpenSales {
         tasks.add(breakoutSubassemblies1);
         tasks.add(groupSalesOrders2);
         tasks.add(filterSubassemblies2);
-        tasks.add(breakoutSubassemblies2);
+        tasks.add(breakoutSubassemblies2);*/
         tasks.add(writeTask1);
         tasks.add(writeTask2);
         tasks.add(writeTask3);
-        tasks.add(writeTask4);
-        tasks.add(writeTask5);
-        tasks.add(writeTask6);
         tasks.add(writeTask7);
         totalProgress = Bindings.createDoubleBinding(() -> (Math.max(0, tableConvertTask.getProgress()) +
                                                             Math.max(0, groupData.getProgress()) +
                                                             Math.max(0, createSalesOrders.getProgress()) +
                                                             Math.max(0, mapTemplate.getProgress()) +
                                                             Math.max(0, kitMapper.getTotalProgress()) +
-                                                            Math.max(0, groupSalesOrders.getProgress()) +
+                                                            /*Math.max(0, groupSalesOrders.getProgress()) +
                                                             Math.max(0, filterSubassemblies.getProgress()) +
                                                             Math.max(0, breakoutSubassemblies.getProgress()) +
                                                             Math.max(0, groupSalesOrders1.getProgress()) +
@@ -250,21 +238,18 @@ public class POROpenSales {
                                                             Math.max(0, breakoutSubassemblies1.getProgress()) +
                                                             Math.max(0, groupSalesOrders2.getProgress()) +
                                                             Math.max(0, filterSubassemblies2.getProgress()) +
-                                                            Math.max(0, breakoutSubassemblies2.getProgress()) +
+                                                            Math.max(0, breakoutSubassemblies2.getProgress()) +*/
                                                             Math.max(0, writeTask1.getProgress()) +
                                                             Math.max(0, writeTask2.getProgress()) +
                                                             Math.max(0, writeTask3.getProgress()) +
-                                                            Math.max(0, writeTask4.getProgress()) +
-                                                            Math.max(0, writeTask5.getProgress()) +
-                                                            Math.max(0, writeTask6.getProgress()) +
                                                             Math.max(0, writeTask7.getProgress())
-                                                           ) / 21,
+                                                           ) / 9,
                                                      tableConvertTask.progressProperty(),
                                                      groupData.progressProperty(),
                                                      createSalesOrders.progressProperty(),
                                                      mapTemplate.progressProperty(),
                                                      kitMapper.totalProgressProperty(),
-                                                     groupSalesOrders.progressProperty(),
+                                                     /*groupSalesOrders.progressProperty(),
                                                      filterSubassemblies.progressProperty(),
                                                      breakoutSubassemblies.progressProperty(),
                                                      groupSalesOrders1.progressProperty(),
@@ -272,33 +257,12 @@ public class POROpenSales {
                                                      breakoutSubassemblies1.progressProperty(),
                                                      groupSalesOrders2.progressProperty(),
                                                      filterSubassemblies2.progressProperty(),
-                                                     breakoutSubassemblies2.progressProperty(),
+                                                     breakoutSubassemblies2.progressProperty(),*/
                                                      writeTask1.progressProperty(),
                                                      writeTask2.progressProperty(),
                                                      writeTask3.progressProperty(),
-                                                     writeTask4.progressProperty(),
-                                                     writeTask5.progressProperty(),
-                                                     writeTask6.progressProperty(),
                                                      writeTask7.progressProperty()
         );
-    }
-
-    /**
-     * Gets the list of sub-tasks
-     *
-     * @return The list of sub-tasks
-     */
-    public List<Task<?>> getTasks() {
-        return tasks;
-    }
-
-    /**
-     * Gets the value of the total progress
-     *
-     * @return The total progress value
-     */
-    public double getTotalProgress() {
-        return totalProgress.get();
     }
 
     /**
@@ -342,13 +306,13 @@ public class POROpenSales {
             writeTask2.setTable(mapTemplate.getValue().get(1));
             writeTask3.setTable(mapTemplate.getValue().get(2));
             writeTask7.setTable(mapTemplate.getValue().get(3));
-            groupSalesOrders.setData(mapTemplate.getValue().get(0));
+            /*groupSalesOrders.setData(mapTemplate.getValue().get(0));
             groupSalesOrders1.setData(mapTemplate.getValue().get(1));
-            groupSalesOrders2.setData(mapTemplate.getValue().get(2));
+            groupSalesOrders2.setData(mapTemplate.getValue().get(2));*/
             executorService.submit(writeTask1);
         });
-        writeTask3.setOnSucceeded(event -> executorService.submit(groupSalesOrders));
-        groupSalesOrders.setOnSucceeded(event -> {
+        writeTask3.setOnSucceeded(event -> executorService.submit(writeTask7));
+        /*groupSalesOrders.setOnSucceeded(event -> {
             filterSubassemblies.setData(groupSalesOrders.getValue());
             filterSubassemblies.setKits(kitMapping.getValue());
             executorService.submit(filterSubassemblies);
@@ -410,12 +374,30 @@ public class POROpenSales {
             writeTask6.setSheets(addBreakoutHeader(table, breakoutTable));
             executorService.submit(writeTask6);
         });
-        writeTask6.setOnSucceeded(event -> executorService.submit(writeTask7));
+        writeTask6.setOnSucceeded(event -> executorService.submit());*/
         writeTask7.setOnSucceeded(event -> totalProgress.add(0.0001));
         writeTask1.setOnSucceeded(event -> executorService.submit(writeTask2));
         writeTask2.setOnSucceeded(event -> executorService.submit(writeTask3));
         executorService.submit(tableConvertTask);
         kitMapper.map(executorService);
+    }
+
+    /**
+     * Gets the list of sub-tasks
+     *
+     * @return The list of sub-tasks
+     */
+    public List<Task<?>> getTasks() {
+        return tasks;
+    }
+
+    /**
+     * Gets the value of the total progress
+     *
+     * @return The total progress value
+     */
+    public double getTotalProgress() {
+        return totalProgress.get();
     }
 
     private Map<String, List<List<String>>> addBreakoutHeader(List<List<String>> table,
@@ -1099,6 +1081,12 @@ public class POROpenSales {
             return tables;
         }
 
+        @Override
+        protected void succeeded() {
+            updateProgress(1.0, 1.0);
+            super.succeeded();
+        }
+
         /**
          * Logs the exception when the task transitions to the failure state
          */
@@ -1160,6 +1148,21 @@ public class POROpenSales {
                 utils.sleep(1);
             }
             return groupedMap;
+        }
+
+        @Override
+        protected void succeeded() {
+            updateProgress(1.0, 1.0);
+            super.succeeded();
+        }
+
+        /**
+         * Logs the exception when the task transitions to the failure state
+         */
+        @Override
+        protected void failed() {
+            logger.fatal("Mapping Failed", getException());
+            System.exit(-1);
         }
 
         public void setData(List<List<String>> data) {

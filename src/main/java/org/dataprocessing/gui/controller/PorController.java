@@ -212,7 +212,7 @@ public class PorController {
                 model.addTasks(porOpenPO.getTasks());
                 DoubleBinding totalProgress = Bindings.createDoubleBinding(() -> (
                                                                                          Math.max(0,
-                                                                                                  porCustomer.getOverallTaskProgress()
+                                                                                                  porCustomer.getTotalProgress()
                                                                                          ) +
                                                                                          Math.max(0,
                                                                                                   porItemMaster.getTotalProgress()
@@ -227,7 +227,7 @@ public class PorController {
                                                                                                   porOpenPO.getTotalProgress()
                                                                                          )
                                                                                  ) / 5,
-                                                                           porCustomer.overallTaskProgressProperty(),
+                                                                           porCustomer.totalProgressProperty(),
                                                                            porItemMaster.totalProgressProperty(),
                                                                            porOpenAR.totalProgressProperty(),
                                                                            porOpenSales.totalProgressProperty(),
